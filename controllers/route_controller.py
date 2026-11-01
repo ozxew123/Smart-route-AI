@@ -12,11 +12,13 @@ map_service = MapService()
 weather_service = WeatherService()
 
 @route_bp.route('/')
+@route_bp.route('/index.html')
 def index():
     """Halaman Landing Page publik."""
     return render_template('index.html')
 
 @route_bp.route('/home')
+@route_bp.route('/home.html')
 def home():
     """Halaman Utama aplikasi asisten perjalanan."""
     return render_template('home.html', user_name=session.get('user_name'))

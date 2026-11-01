@@ -1,61 +1,97 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartRoute AI - Asisten Perjalanan Pintar</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Eksternal (Kompatibel dengan Live Server & Flask) -->
+    <link rel="stylesheet" href="../static/css/landing.css">
+</head>
+<body>
 
-{% block title %}SmartRoute AI - Asisten Perjalanan Komuter Cerdas{% endblock %}
-
-{% block content %}
-<div class="container py-5">
-    <div class="row align-items-center g-5">
-        <div class="col-lg-6">
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-3 px-3 py-2 rounded-pill">
-                <i class="bi bi-stars"></i> NLP & Analisis Cuaca Real-Time
-            </span>
-            <h1 class="display-4 fw-bold text-dark lh-tight mb-3">
-                Rencanakan Perjalanan dengan Aman Bersama <span class="text-primary">SmartRoute AI</span>
-            </h1>
-            <p class="lead text-secondary mb-4">
-                Asisten perjalanan berbasis web khusus komuter dan pengendara sepeda motor. Cukup ketik atau ucapkan
-                tujuan Anda, sistem akan menganalisis rute dan kondisi cuaca di titik awal, tengah, hingga akhir
-                perjalanan Anda secara otomatis.
-            </p>
-            <div class="d-flex flex-wrap gap-3">
-                <a href="{{ url_for('route.home') }}" class="btn btn-primary btn-lg px-4 shadow-sm">
-                    <i class="bi bi-play-circle me-1"></i> Coba Rute Sekarang
-                </a>
-                {% if not session.get('user_id') %}
-                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg px-4">
-                    Buat Akun
-                </a>
-                {% endif %}
+    <!-- Header / Navigasi -->
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="../static/images/Logo Penanda Lokasi Robot Pegunungan.png" alt="SmartRoute AI Logo">
+                SmartRoute AI
+            </a>
+            <div class="nav-links">
+                <a href="login.html" class="btn-outline">Masuk</a>
+                <a href="register.html" class="btn-filled">Daftar Gratis</a>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                <div class="card-body p-4 bg-white">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <span class="p-2 bg-primary rounded-3 text-white"><i class="bi bi-chat-left-dots"></i></span>
-                        <h5 class="card-title mb-0 fw-bold">Contoh Perintah Suara & Teks</h5>
-                    </div>
-                    <div class="p-3 bg-light rounded-3 mb-3 border">
-                        <p class="mb-0 text-muted fst-italic">"Mau berangkat naik motor dari Kampus D Gunadarma Depok ke
-                            Monas Jakarta Pusat."</p>
-                    </div>
-                    <div class="border rounded-3 p-3">
-                        <h6 class="fw-semibold text-primary mb-2"><i class="bi bi-shield-check"></i> Yang Dihasilkan
-                            SmartRoute AI:</h6>
-                        <ul class="list-unstyled mb-0 small text-secondary">
-                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Ekstraksi otomatis
-                                lokasi asal, tujuan, dan moda transportasi.</li>
-                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Jalur visual peta
-                                interaktif Leaflet.js dengan estimasi jarak & durasi.</li>
-                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Analisis cuaca 3
-                                titik (Depok, Lenteng Agung, Monas).</li>
-                            <li><i class="bi bi-check2-circle text-success me-2"></i> Rekomendasi keselamatan
-                                keselamatan berkendara yang adaptif.</li>
-                        </ul>
-                    </div>
+    </header>
+
+    <!-- Hero Section Utama -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="badge">🚀 Inovasi e-Transportasi 2026</div>
+            <h1>Perjalanan Lebih Aman dengan <span>Asisten Cerdas Anda.</span></h1>
+            <p>SmartRoute AI memadukan pemrosesan bahasa alami (NLP) dan analisis cuaca real-time untuk merencanakan rute teraman bagi Anda, khususnya pengendara komuter.</p>
+            <a href="register.html" class="btn-filled" style="font-size: 1.1rem; padding: 15px 32px;">Mulai Rencanakan Perjalanan <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i></a>
+        </div>
+        <div class="hero-image">
+            <!-- Gambar Logo Beranimasi Mengambang -->
+            <img src="../static/images/Logo Penanda Lokasi Robot Pegunungan.png" alt="Ilustrasi SmartRoute">
+        </div>
+    </section>
+
+    <!-- Seksi Fitur -->
+    <section class="features" id="fitur">
+        <h2 class="section-title">Mengapa Memilih SmartRoute AI?</h2>
+        <div class="features-grid">
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-microphone-lines"></i>
                 </div>
+                <h3>Pencarian Cerdas (NLP)</h3>
+                <p>Cukup ketik atau sebutkan tujuan Anda seperti bahasa sehari-hari. Biar AI kami yang memahami lokasi, kendaraan, dan preferensi Anda secara instan.</p>
             </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: var(--accent-mint); background: rgba(16, 185, 129, 0.1);">
+                    <i class="fa-solid fa-cloud-sun-rain"></i>
+                </div>
+                <h3>Cuaca 3 Titik Akurat</h3>
+                <p>Bukan cuma cuaca di lokasi awal! Kami memantau kondisi cuaca di titik awal, tengah, dan akhir perjalanan agar Anda siap menghadapi perubahan.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: #F59E0B; background: rgba(245, 158, 11, 0.1);">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3>AI Safety Advisor</h3>
+                <p>Berdasarkan rute dan cuaca, asisten kami memberikan saran keselamatan real-time seperti peringatan hujan atau saran memakai perlengkapan ekstra.</p>
+            </div>
+
         </div>
-    </div>
-</div>
-{% endblock %}
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <img src="../static/images/Logo Penanda Lokasi Robot Pegunungan.png" alt="Logo" style="height: 30px; filter: brightness(0) invert(1);">
+            <h3 style="margin:0;">SmartRoute AI</h3>
+        </div>
+        <p>Disusun untuk memenuhi tugas mata kuliah: Pemrograman Web.</p>
+        <p>&copy; 2026 Informatika, Universitas Gunadarma - Kelompok 4.</p>
+    </footer>
+
+    <!-- Script Kebutuhan Fungsional (PRD Bab 5): Pengecekan Sesi -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const isLoggedIn = localStorage.getItem("isLoggedIn");
+            if (isLoggedIn === "true") {
+                window.location.href = "home.html";
+            }
+        });
+    </script>
+</body>
+</html>
