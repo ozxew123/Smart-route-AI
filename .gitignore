@@ -1,0 +1,23 @@
+# Environment Variables
+.env
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Databases
+*.db
+*.sqlite3
+instance/
+
+# Temporary extractions
+laporan_extracted.txt
+
+# OS and IDE files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+

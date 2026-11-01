@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartRoute AI - Masuk</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Eksternal (Kompatibel dengan VS Code Live Server & Flask) -->
+    <link rel="stylesheet" href="../static/css/auth.css">
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <!-- Logo Brand SmartRoute AI -->
+            <img src="../static/images/Logo Penanda Lokasi Robot Pegunungan.png" alt="SmartRoute AI Logo" class="auth-logo-img">
+            
+            <h2 class="auth-title">Masuk ke Akun</h2>
+            <p class="auth-subtitle">Selamat datang kembali di SmartRoute AI</p>
+
+            <!-- Wadah Flash Pesan / Validasi Flask -->
+            <div id="flashContainer">
+                {% if get_flashed_messages is defined %}
+                    {% for category, message in get_flashed_messages(with_categories=true) %}
+                        <div class="auth-alert auth-alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <form action="/login" method="POST">
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" name="email" placeholder="Alamat Email" inputmode="email" autocomplete="email" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" name="password" placeholder="Kata Sandi" autocomplete="current-password" required>
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <i class="fa-solid fa-right-to-bracket"></i> Masuk
+                </button>
+            </form>
+            
+            <div class="auth-divider">Atau</div>
+
+            <button type="button" class="btn-google">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo">
+                Masuk dengan Google
+            </button>
+
+            <div class="auth-link">
+                Belum punya akun? <a href="register.html">Daftar sekarang</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Proteksi: Sembunyikan kode template jika dibuka langsung lewat Live Server -->
+    <script>
+        (function() {
+            var flashBox = document.getElementById('flashContainer');
+            if (flashBox && (flashBox.innerHTML.indexOf('{%') !== -1 || flashBox.innerHTML.indexOf('{{') !== -1)) {
+                flashBox.style.display = 'none';
+            }
+        })();
+    </script>
+</body>
+</html>

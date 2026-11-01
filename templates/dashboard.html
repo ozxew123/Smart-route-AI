@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Riwayat Perjalanan - SmartRoute AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Riwayat Perjalanan</h3>
+            <p class="text-muted small mb-0">Daftar rute yang pernah Anda analisis sebelumnya</p>
+        </div>
+        <a href="{{ url_for('route.home') }}" class="btn btn-primary btn-sm shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Analisis Rute Baru
+        </a>
+    </div>
+
+    {% if histories %}
+    <div class="row g-3">
+        {% for h in histories %}
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle text-capitalize">
+                                <i class="bi bi-geo-alt"></i> {{ h.vehicle }}
+                            </span>
+                            <span class="text-muted small">{{ h.created_at }}</span>
+                        </div>
+                        <form action="{{ url_for('history.delete_history', history_id=h.id) }}" method="POST" onsubmit="return confirm('Hapus riwayat ini?');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-trash"></i> Hapus
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <span class="small text-muted d-block">Asal:</span>
+                            <strong class="text-dark">{{ h.origin }}</strong>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="small text-muted d-block">Tujuan:</span>
+                            <strong class="text-dark">{{ h.destination }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <span class="badge bg-secondary mb-1">Query Pengguna:</span>
+                        <p class="mb-0 small text-secondary fst-italic">"{{ h.raw_query }}"</p>
+                    </div>
+
+                    {% if h.ai_advice %}
+                    <div class="alert alert-info py-2 px-3 mb-0 small">
+                        <strong><i class="bi bi-robot"></i> Saran AI:</strong> {{ h.ai_advice }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+        <div class="card-body">
+            <i class="bi bi-clock-history fs-1 text-muted mb-3 d-block"></i>
+            <h5 class="fw-bold">Belum Ada Riwayat Perjalanan</h5>
+            <p class="text-muted small">Mulai rencanakan rute perjalanan Anda untuk menyimpannya di sini.</p>
+            <a href="{{ url_for('route.home') }}" class="btn btn-primary btn-sm px-4">Buat Rencana Rute</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

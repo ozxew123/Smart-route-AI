@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}SmartRoute AI - Asisten Perjalanan Komuter Cerdas{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-3 px-3 py-2 rounded-pill">
+                <i class="bi bi-stars"></i> NLP & Analisis Cuaca Real-Time
+            </span>
+            <h1 class="display-4 fw-bold text-dark lh-tight mb-3">
+                Rencanakan Perjalanan dengan Aman Bersama <span class="text-primary">SmartRoute AI</span>
+            </h1>
+            <p class="lead text-secondary mb-4">
+                Asisten perjalanan berbasis web khusus komuter dan pengendara sepeda motor. Cukup ketik atau ucapkan
+                tujuan Anda, sistem akan menganalisis rute dan kondisi cuaca di titik awal, tengah, hingga akhir
+                perjalanan Anda secara otomatis.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ url_for('route.home') }}" class="btn btn-primary btn-lg px-4 shadow-sm">
+                    <i class="bi bi-play-circle me-1"></i> Coba Rute Sekarang
+                </a>
+                {% if not session.get('user_id') %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg px-4">
+                    Buat Akun
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-4 bg-white">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="p-2 bg-primary rounded-3 text-white"><i class="bi bi-chat-left-dots"></i></span>
+                        <h5 class="card-title mb-0 fw-bold">Contoh Perintah Suara & Teks</h5>
+                    </div>
+                    <div class="p-3 bg-light rounded-3 mb-3 border">
+                        <p class="mb-0 text-muted fst-italic">"Mau berangkat naik motor dari Kampus D Gunadarma Depok ke
+                            Monas Jakarta Pusat."</p>
+                    </div>
+                    <div class="border rounded-3 p-3">
+                        <h6 class="fw-semibold text-primary mb-2"><i class="bi bi-shield-check"></i> Yang Dihasilkan
+                            SmartRoute AI:</h6>
+                        <ul class="list-unstyled mb-0 small text-secondary">
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Ekstraksi otomatis
+                                lokasi asal, tujuan, dan moda transportasi.</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Jalur visual peta
+                                interaktif Leaflet.js dengan estimasi jarak & durasi.</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Analisis cuaca 3
+                                titik (Depok, Lenteng Agung, Monas).</li>
+                            <li><i class="bi bi-check2-circle text-success me-2"></i> Rekomendasi keselamatan
+                                keselamatan berkendara yang adaptif.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
