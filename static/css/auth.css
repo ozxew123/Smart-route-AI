@@ -1,17 +1,17 @@
 /* ============================================================
-   SmartRoute AI - Modern Responsive Auth Theme (Desktop & Mobile)
+   SmartRoute AI - Modern Responsive Auth Theme
+   Features Light Blue Indonesian Batik Kawung Motif & Glassmorphism
    ============================================================ */
 
 :root {
-    --bg-color: #E0F2FE;          /* Biru langit lembut */
-    --primary-blue: #0EA5E9;      /* Biru langit cerah */
-    --primary-hover: #0284C7; 
-    --text-main: #1E293B; 
+    --primary-blue: #0284C7;
+    --primary-hover: #0369A1;
+    --primary-light: #F0F9FF;
+    --primary-border: #BAE6FD;
+    --accent-cyan: #06B6D4;
+    --text-main: #0F172A;
     --text-light: #64748B;
-    --card-bg: #FFFFFF;
     --border-color: #E2E8F0;
-    --shadow-desktop: 0 16px 36px rgba(14, 165, 233, 0.16); 
-    --shadow-mobile: 0 6px 20px rgba(14, 165, 233, 0.12);
 }
 
 * {
@@ -22,95 +22,175 @@
 }
 
 body {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: var(--bg-color);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text-main);
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
+    
+    /* Elegant Light-Blue Batik Kawung Background */
+    background-color: #F0F9FF;
+    background-image: 
+        radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.42) 0%, transparent 40%),
+        radial-gradient(circle at 88% 82%, rgba(2, 132, 199, 0.32) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.55) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2780%27%20height%3D%2780%27%20viewBox%3D%270%200%2080%2080%27%3E%0A%20%20%3Cg%20stroke%3D%27%230284C7%27%20stroke-width%3D%271.2%27%20fill%3D%27none%27%20stroke-opacity%3D%270.16%27%3E%0A%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%2728%27%20/%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%270%27%20r%3D%2728%27%20/%3E%0A%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%2780%27%20r%3D%2728%27%20/%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%2780%27%20r%3D%2728%27%20/%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2740%27%20cy%3D%2740%27%20r%3D%2728%27%20/%3E%0A%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%2714%27%20stroke-dasharray%3D%272%2C3%27%20stroke-opacity%3D%270.12%27%20/%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%270%27%20r%3D%2714%27%20stroke-dasharray%3D%272%2C3%27%20stroke-opacity%3D%270.12%27%20/%3E%0A%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%2780%27%20r%3D%2714%27%20stroke-dasharray%3D%272%2C3%27%20stroke-opacity%3D%270.12%27%20/%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%2780%27%20r%3D%2714%27%20stroke-dasharray%3D%272%2C3%27%20stroke-opacity%3D%270.12%27%20/%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2740%27%20cy%3D%2740%27%20r%3D%2714%27%20stroke-dasharray%3D%272%2C3%27%20stroke-opacity%3D%270.12%27%20/%3E%0A%20%20%3C/g%3E%0A%20%20%3Cg%20fill%3D%27%230284C7%27%20fill-opacity%3D%270.07%27%3E%0A%20%20%20%20%3Cpath%20d%3D%27M40%2024%20C44%2032%2C%2044%2032%2C%2056%2040%20C44%2048%2C%2044%2048%2C%2040%2056%20C36%2048%2C%2036%2048%2C%2024%2040%20C36%2032%2C%2036%2032%2C%2040%2024%20Z%27%20/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M0%2024%20C4%2032%2C%204%2032%2C%2016%2040%20C4%2048%2C%204%2048%2C%200%2056%20C-4%2048%2C%20-4%2048%2C%20-16%2040%20C-4%2032%2C%20-4%2032%2C%200%2024%20Z%27%20/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M80%2024%20C84%2032%2C%2084%2032%2C%2096%2040%20C84%2048%2C%2084%2048%2C%2080%2056%20C76%2048%2C%2076%2048%2C%2064%2040%20C76%2032%2C%2076%2032%2C%2080%2024%20Z%27%20/%3E%0A%20%20%3C/g%3E%0A%20%20%3Ccircle%20cx%3D%2740%27%20cy%3D%2740%27%20r%3D%274%27%20fill%3D%27%230284C7%27%20fill-opacity%3D%270.22%27%20/%3E%0A%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%274%27%20fill%3D%27%230284C7%27%20fill-opacity%3D%270.22%27%20/%3E%0A%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%270%27%20r%3D%274%27%20fill%3D%27%230284C7%27%20fill-opacity%3D%270.22%27%20/%3E%0A%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%2780%27%20r%3D%274%27%20fill%3D%27%230284C7%27%20fill-opacity%3D%270.22%27%20/%3E%0A%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%2780%27%20r%3D%274%27%20fill%3D%27%230284C7%27%20fill-opacity%3D%270.22%27%20/%3E%0A%3C/svg%3E");
+    background-size: auto, auto, auto, 80px 80px;
+    background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+    background-attachment: fixed;
+    position: relative;
+    overflow-x: hidden;
 }
 
-/* --- Layout Wrapper (Fleksibel Vertikal & Horizontal) --- */
+/* Floating Ambient Orbs */
+body::before {
+    content: '';
+    position: fixed;
+    top: -80px;
+    left: -80px;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.22) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    bottom: -80px;
+    right: -80px;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.22) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* --- Layout Wrapper --- */
 .auth-wrapper {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
     min-height: 100vh;
     min-height: 100dvh;
-    padding: clamp(14px, 3.5vw, 32px);
-    overflow-y: auto;
+    padding: clamp(20px, 4vw, 40px) 16px;
+    position: relative;
+    z-index: 1;
 }
 
-/* --- Kartu Autentikasi (Fluid Size untuk Desktop & Mobile) --- */
+/* --- Top Navigation Link (Back to Home) --- */
+.auth-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(2, 132, 199, 0.22);
+    padding: 8px 18px;
+    border-radius: 9999px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.08);
+    transition: all 0.25s ease;
+}
+
+.auth-back-link i {
+    color: var(--primary-blue);
+    transition: transform 0.2s ease;
+}
+
+.auth-back-link:hover {
+    background: #FFFFFF;
+    border-color: var(--primary-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.16);
+    color: var(--primary-blue);
+}
+
+.auth-back-link:hover i {
+    transform: translateX(-3px);
+}
+
+/* --- Glassmorphic Auth Card --- */
 .auth-card {
-    background: var(--card-bg);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     width: 100%;
-    max-width: 430px; /* Pas dan gagah di layar Desktop/Laptop */
-    margin: auto;
-    padding: clamp(24px, 5vw, 40px) clamp(20px, 5vw, 36px);
-    border-radius: clamp(14px, 3vw, 20px);
-    box-shadow: var(--shadow-desktop);
-    border: 1px solid var(--border-color);
+    max-width: 440px;
+    margin: 0 auto;
+    padding: clamp(28px, 5vw, 40px) clamp(22px, 5vw, 36px);
+    border-radius: 22px;
+    box-shadow: 0 20px 45px -10px rgba(2, 132, 199, 0.22), 0 0 0 1px rgba(14, 165, 233, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.95);
     text-align: center;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
 }
 
-/* Efek hover halus di desktop */
 @media (hover: hover) {
     .auth-card:hover {
-        box-shadow: 0 20px 42px rgba(14, 165, 233, 0.2);
+        box-shadow: 0 24px 50px -10px rgba(2, 132, 199, 0.28), 0 0 0 1px rgba(14, 165, 233, 0.22);
     }
 }
 
 /* --- Brand Logo --- */
 .auth-logo-img {
-    width: clamp(56px, 12vw, 76px); /* Desktop ~76px, Mobile ~56px */
+    width: clamp(58px, 12vw, 76px);
     height: auto;
-    margin-bottom: clamp(10px, 2.5vw, 16px);
-    filter: drop-shadow(0 6px 12px rgba(14, 165, 233, 0.38));
+    margin-bottom: clamp(12px, 2.5vw, 16px);
+    filter: drop-shadow(0 8px 16px rgba(2, 132, 199, 0.35));
 }
 
-/* --- Tipografi Header --- */
+/* --- Typography --- */
 .auth-title {
-    font-size: clamp(1.25rem, 3.5vw, 1.55rem);
+    font-size: clamp(1.35rem, 3.5vw, 1.6rem);
     color: var(--text-main);
     margin-bottom: 4px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .auth-subtitle {
-    font-size: clamp(0.82rem, 2vw, 0.92rem);
+    font-size: clamp(0.84rem, 2vw, 0.92rem);
     color: var(--text-light);
-    margin-bottom: clamp(16px, 3.5vw, 22px);
+    margin-bottom: clamp(18px, 3.5vw, 24px);
 }
 
-/* --- Form Fields & Input Groups --- */
+/* --- Form Fields --- */
 .input-group {
-    margin-bottom: clamp(11px, 2.5vw, 15px);
+    margin-bottom: clamp(12px, 2.5vw, 16px);
     position: relative;
     width: 100%;
 }
 
 .input-group i {
     position: absolute;
-    left: clamp(13px, 3vw, 16px);
+    left: clamp(14px, 3vw, 16px);
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-light);
-    font-size: clamp(0.85rem, 2vw, 0.95rem);
+    font-size: clamp(0.9rem, 2vw, 0.95rem);
     pointer-events: none;
     transition: color 0.2s ease;
 }
 
 .input-group input {
     width: 100%;
-    padding: clamp(11px, 2.5vw, 13.5px) 14px clamp(11px, 2.5vw, 13.5px) clamp(38px, 6vw, 44px);
-    border: 1px solid var(--border-color);
-    border-radius: clamp(9px, 2vw, 12px);
-    font-size: clamp(0.9rem, 2vw, 0.95rem);
+    padding: clamp(12px, 2.5vw, 13.5px) 14px clamp(12px, 2.5vw, 13.5px) clamp(40px, 6vw, 44px);
+    border: 1.5px solid var(--border-color);
+    border-radius: 12px;
+    font-size: clamp(0.92rem, 2vw, 0.96rem);
     font-family: inherit;
     color: var(--text-main);
     background-color: #F8FAFC;
@@ -121,7 +201,7 @@ body {
     outline: none;
     border-color: var(--primary-blue);
     background-color: #FFFFFF;
-    box-shadow: 0 0 0 3.5px rgba(14, 165, 233, 0.2);
+    box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
 }
 
 .input-group input:focus + i,
@@ -129,44 +209,45 @@ body {
     color: var(--primary-blue);
 }
 
-/* --- Tombol Utama (Daftar / Masuk) --- */
+/* --- Primary Button --- */
 .btn-primary {
     width: 100%;
-    background-color: var(--primary-blue);
+    background: linear-gradient(135deg, var(--primary-blue), #0284C7);
     color: #FFFFFF;
     border: none;
-    padding: clamp(11px, 2.5vw, 13.5px) 16px;
-    border-radius: clamp(9px, 2vw, 12px);
-    font-size: clamp(0.92rem, 2vw, 1rem);
-    font-weight: 600;
+    padding: clamp(12px, 2.5vw, 14px) 16px;
+    border-radius: 12px;
+    font-size: clamp(0.95rem, 2vw, 1rem);
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 8px;
-    margin-top: 6px;
-    min-height: clamp(44px, 6vw, 48px);
+    margin-top: 8px;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.28);
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-hover);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    background: #0369A1;
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.38);
+    transform: translateY(-1px);
 }
 
 .btn-primary:active {
-    transform: scale(0.98);
+    transform: translateY(0);
 }
 
-/* --- Tombol Masuk/Daftar dengan Google --- */
+/* --- Google Button --- */
 .btn-google {
     background-color: #FFFFFF;
-    color: #475569;
+    color: #334155;
     border: 1px solid var(--border-color);
     width: 100%;
     padding: clamp(10px, 2.5vw, 12px) 16px;
-    border-radius: clamp(9px, 2vw, 12px);
-    font-size: clamp(0.85rem, 2vw, 0.92rem);
+    border-radius: 12px;
+    font-size: clamp(0.88rem, 2vw, 0.92rem);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -175,32 +256,27 @@ body {
     align-items: center;
     gap: 10px;
     margin-top: clamp(8px, 2vw, 12px);
-    min-height: clamp(42px, 6vw, 46px);
 }
 
 .btn-google:hover {
     background-color: #F8FAFC;
     border-color: #CBD5E1;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.btn-google:active {
-    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .btn-google img {
-    width: clamp(16px, 3.5vw, 19px);
-    height: clamp(16px, 3.5vw, 19px);
+    width: 18px;
+    height: 18px;
 }
 
-/* --- Garis Pemisah (Divider) --- */
+/* --- Divider --- */
 .auth-divider {
     display: flex;
     align-items: center;
     text-align: center;
-    margin: clamp(12px, 3vw, 18px) 0;
+    margin: clamp(14px, 3vw, 18px) 0;
     color: var(--text-light);
-    font-size: clamp(0.78rem, 2vw, 0.85rem);
+    font-size: 0.84rem;
 }
 
 .auth-divider::before, .auth-divider::after {
@@ -212,127 +288,51 @@ body {
 .auth-divider::before { margin-right: 12px; }
 .auth-divider::after { margin-left: 12px; }
 
-/* --- Tautan Bawah (Auth Link) --- */
+/* --- Auth Link --- */
 .auth-link {
-    margin-top: clamp(12px, 3vw, 18px);
-    font-size: clamp(0.82rem, 2vw, 0.9rem);
+    margin-top: clamp(14px, 3vw, 20px);
+    font-size: 0.88rem;
     color: var(--text-light);
 }
 
 .auth-link a {
     color: var(--primary-blue);
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     transition: color 0.2s ease;
-    padding: 2px 4px;
 }
 
 .auth-link a:hover {
-    color: var(--primary-hover);
     text-decoration: underline;
+    color: var(--primary-hover);
 }
 
-/* --- Pesan Validasi / Flash Alerts --- */
+/* --- Security Badge --- */
+.auth-trust-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 22px;
+    font-size: 0.78rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.auth-trust-footer i {
+    color: #10B981;
+}
+
+/* --- Flash Alerts --- */
 .auth-alert {
-    padding: clamp(8px, 2vw, 12px) 14px;
-    border-radius: clamp(8px, 2vw, 10px);
-    font-size: clamp(0.8rem, 2vw, 0.86rem);
-    margin-bottom: clamp(10px, 2.5vw, 14px);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    margin-bottom: 14px;
     text-align: left;
 }
 
-.auth-alert-danger {
-    background-color: #FEE2E2;
-    color: #991B1B;
-    border: 1px solid #F87171;
-}
-
-.auth-alert-success {
-    background-color: #DCFCE7;
-    color: #166534;
-    border: 1px solid #4ADE80;
-}
-
-.auth-alert-warning {
-    background-color: #FEF3C7;
-    color: #92400E;
-    border: 1px solid #FCD34D;
-}
-
-.auth-alert-info {
-    background-color: #E0F2FE;
-    color: #0369A1;
-    border: 1px solid #7DD3FC;
-}
-
-/* ============================================================
-   TUNE KHUSUS DESKTOP BESAR (Min-Width 768px)
-   Memastikan tampilan di Web / Laptop tampak proporsional,
-   elegan, dan gagah tanpa terlihat ciut.
-   ============================================================ */
-@media (min-width: 768px) {
-    .auth-card {
-        padding: 40px 36px;
-    }
-
-    .auth-logo-img {
-        width: 78px;
-        margin-bottom: 16px;
-    }
-
-    .auth-title {
-        font-size: 1.55rem;
-    }
-
-    .auth-subtitle {
-        font-size: 0.92rem;
-        margin-bottom: 22px;
-    }
-
-    .input-group {
-        margin-bottom: 15px;
-    }
-
-    .input-group input {
-        padding: 13.5px 16px 13.5px 44px;
-        font-size: 0.95rem;
-    }
-
-    .btn-primary {
-        padding: 13.5px 16px;
-        font-size: 1rem;
-    }
-
-    .btn-google {
-        padding: 12px 16px;
-        font-size: 0.92rem;
-    }
-}
-
-/* ============================================================
-   TUNE KHUSUS PONSEL SANGAT PENDEK / LAYAR LANSKAP
-   ============================================================ */
-@media (max-height: 600px) {
-    .auth-wrapper {
-        padding-top: 10px;
-        padding-bottom: 10px;
-    }
-
-    .auth-card {
-        padding-top: 16px;
-        padding-bottom: 16px;
-    }
-
-    .auth-logo-img {
-        width: 48px;
-        margin-bottom: 6px;
-    }
-
-    .auth-subtitle {
-        margin-bottom: 12px;
-    }
-
-    .input-group {
-        margin-bottom: 8px;
-    }
-}
+.auth-alert-danger { background-color: #FEE2E2; color: #991B1B; border: 1px solid #F87171; }
+.auth-alert-success { background-color: #DCFCE7; color: #166534; border: 1px solid #4ADE80; }
+.auth-alert-warning { background-color: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+.auth-alert-info { background-color: #E0F2FE; color: #0369A1; border: 1px solid #7DD3FC; }

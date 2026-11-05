@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartRoute AI - Masuk</title>
+    <title>SmartRoute AI — Masuk ke Akun</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome untuk Ikon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- CSS Eksternal (Kompatibel dengan VS Code Live Server & Flask) -->
     <link rel="stylesheet" href="../static/css/auth.css">
@@ -15,6 +15,12 @@
 <body>
 
     <div class="auth-wrapper">
+        <!-- Navigasi Kembali ke Beranda -->
+        <a href="index.html" class="auth-back-link">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Kembali ke Beranda</span>
+        </a>
+
         <div class="auth-card">
             <!-- Logo Brand SmartRoute AI -->
             <img src="../static/images/Logo Penanda Lokasi Robot Pegunungan.png" alt="SmartRoute AI Logo" class="auth-logo-img">
@@ -40,6 +46,12 @@
                     <i class="fa-solid fa-lock"></i>
                     <input type="password" name="password" placeholder="Kata Sandi" autocomplete="current-password" required>
                 </div>
+
+                <div style="text-align: right; margin-top: -6px; margin-bottom: 14px;">
+                    <a href="reset-password.html" style="font-size: 0.82rem; color: var(--primary-blue); text-decoration: none; font-weight: 600;">
+                        Lupa kata sandi?
+                    </a>
+                </div>
                 
                 <button type="submit" class="btn-primary">
                     <i class="fa-solid fa-right-to-bracket"></i> Masuk
@@ -56,6 +68,11 @@
             <div class="auth-link">
                 Belum punya akun? <a href="register.html">Daftar sekarang</a>
             </div>
+
+            <div class="auth-trust-footer">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Koneksi Aman & Terenkripsi</span>
+            </div>
         </div>
     </div>
 
@@ -63,7 +80,7 @@
     <script>
         (function() {
             var flashBox = document.getElementById('flashContainer');
-            if (flashBox && (flashBox.innerHTML.indexOf('{%') !== -1 || flashBox.innerHTML.indexOf('{{') !== -1)) {
+            if (flashBox && (flashBox.innerHTML.indexOf('{' + '%') !== -1 || flashBox.innerHTML.indexOf('{' + '{') !== -1)) {
                 flashBox.style.display = 'none';
             }
         })();

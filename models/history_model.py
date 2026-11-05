@@ -28,8 +28,8 @@ class HistoryModel:
         return history_id
 
     @staticmethod
-    def get_history_by_user(user_id, limit=20):
-        """Mengambil daftar riwayat pencarian milik user tertentu."""
+    def get_history_by_user(user_id, limit=30):
+        """Mengambil daftar riwayat pencarian milik user tertentu dengan data terurai."""
         conn = get_db_connection()
         rows = conn.execute(
             """
@@ -41,7 +41,28 @@ class HistoryModel:
             (user_id, limit)
         ).fetchall()
         conn.close()
-        return [dict(row) for row in rows]
+
+        results = []
+        for row in rows:
+            d = dict(row)
+            if isinstance(d.get('route_summary'), str):
+                try:
+                    d['route_data'] = json.loads(d['route_summary'])
+                except Exception:
+                    d['route_data'] = {}
+            else:
+                d['route_data'] = d.get('route_summary') or {}
+
+            if isinstance(d.get('weather_summary'), str):
+                try:
+                    d['weather_data'] = json.loads(d['weather_summary'])
+                except Exception:
+                    d['weather_data'] = {}
+            else:
+                d['weather_data'] = d.get('weather_summary') or {}
+
+            results.append(d)
+        return results
 
     @staticmethod
     def delete_history(history_id, user_id):

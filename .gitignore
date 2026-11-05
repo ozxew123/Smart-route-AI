@@ -21,3 +21,10 @@ laporan_extracted.txt
 Thumbs.db
 Desktop.ini
 
+
+# Frontend Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+node_modules/
+.next/

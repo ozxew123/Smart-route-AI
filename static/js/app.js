@@ -5,7 +5,33 @@ let markersLayer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
+    checkUrlQueryParams();
 });
+
+function checkUrlQueryParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q') || urlParams.get('query');
+    const vehicle = urlParams.get('vehicle');
+
+    if (query) {
+        const textarea = document.getElementById('userQuery');
+        if (textarea) textarea.value = decodeURIComponent(query);
+
+        if (vehicle) {
+            const rad = document.querySelector(`input[name="vehicleOption"][value="${vehicle}"]`);
+            if (rad) rad.checked = true;
+        }
+
+        const auto = urlParams.get('auto');
+        if (auto === '1' || auto === 'true') {
+            setTimeout(() => {
+                if (typeof submitRoute === 'function') {
+                    submitRoute();
+                }
+            }, 500);
+        }
+    }
+}
 
 function initMap() {
     const mapElement = document.getElementById('map');

@@ -49,6 +49,37 @@ def login():
 
     return render_template('login.html')
 
+@auth_bp.route('/reset-password', methods=['GET', 'POST'])
+@auth_bp.route('/reset-password.html', methods=['GET', 'POST'])
+def reset_password():
+    """Halaman dan proses reset kata sandi pengguna."""
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        new_password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        if not email or not new_password or not confirm_password:
+            flash('Semua kolom wajib diisi!', 'danger')
+            return render_template('reset-password.html')
+
+        if new_password != confirm_password:
+            flash('Konfirmasi kata sandi tidak cocok!', 'warning')
+            return render_template('reset-password.html')
+
+        user = UserModel.find_by_email(email)
+        if not user:
+            flash('Alamat email tidak terdaftar dalam sistem.', 'danger')
+            return render_template('reset-password.html')
+
+        try:
+            UserModel.update_password(email, new_password)
+            flash('Kata sandi berhasil diperbarui! Silakan masuk dengan kata sandi baru.', 'success')
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            flash(f'Gagal memperbarui kata sandi: {e}', 'danger')
+
+    return render_template('reset-password.html')
+
 @auth_bp.route('/logout')
 def logout():
     """Mengakhiri sesi pengguna."""

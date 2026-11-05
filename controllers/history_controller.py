@@ -4,6 +4,9 @@ from models.history_model import HistoryModel
 history_bp = Blueprint('history', __name__)
 
 @history_bp.route('/history')
+@history_bp.route('/history.html')
+@history_bp.route('/dashboard')
+@history_bp.route('/dashboard.html')
 def dashboard():
     """Halaman Dashboard Riwayat Perjalanan."""
     user_id = session.get('user_id')

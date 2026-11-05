@@ -63,3 +63,22 @@ class UserModel:
     def verify_password(stored_hash, password):
         """Verifikasi hash password pengguna."""
         return check_password_hash(stored_hash, password)
+
+    @staticmethod
+    def update_password(email, new_password):
+        """Memperbarui kata sandi pengguna berdasarkan email."""
+        password_hash = generate_password_hash(new_password)
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                "UPDATE users SET password_hash = ? WHERE email = ?",
+                (password_hash, email.lower().strip())
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            conn.close()
