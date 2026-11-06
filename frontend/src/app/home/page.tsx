@@ -316,7 +316,7 @@ function HomeContent() {
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder="Contoh: Dari Margonda Depok ke Tebet Eco Park naik motor jangan lewat jalan licin..."
                       required
-                      className="w-full text-xs sm:text-sm font-medium bg-slate-50/80 border border-slate-200 rounded-2xl p-3.5 pr-12 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all resize-none"
+                      className="w-full text-base sm:text-sm font-medium bg-slate-50/80 border border-slate-200 rounded-2xl p-3.5 pr-12 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all resize-none"
                     />
                     <button
                       type="button"
@@ -481,7 +481,7 @@ function HomeContent() {
                           ? "Ketik lokasi awal Anda (cth: Margonda, Depok / Stasiun UI)"
                           : "Ketik lokasi tujuan (cth: Tebet Eco Park, Jakarta)"
                       }
-                      className="w-full text-xs font-semibold pl-3.5 pr-20 py-2.5 rounded-xl border border-sky-300 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                      className="w-full text-base sm:text-xs font-semibold pl-3.5 pr-20 py-2.5 rounded-xl border border-sky-300 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20"
                     />
                     <button
                       type="button"

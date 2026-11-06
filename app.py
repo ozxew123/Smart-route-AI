@@ -8,6 +8,13 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # Keamanan Cookie Sesi (security-and-hardening skill)
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        PERMANENT_SESSION_LIFETIME=86400 * 7 # 7 hari
+    )
+
     # Inisialisasi basis data jika belum ada
     with app.app_context():
         try:
@@ -24,14 +31,22 @@ def create_app():
     app.register_blueprint(route_bp)
     app.register_blueprint(history_bp)
 
-    # Penanganan Halaman Error
+    # HTTP Security Headers (security-and-hardening skill)
+    @app.after_request
+    def set_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        return response
+
+    # Penanganan Halaman Error API & Redirect
     @app.errorhandler(404)
     def page_not_found(e):
-        return render_template('base.html'), 404
+        return {"success": False, "message": "Endpoint tidak ditemukan."}, 404
 
     @app.errorhandler(500)
     def internal_server_error(e):
-        return render_template('base.html'), 500
+        return {"success": False, "message": "Terjadi kesalahan internal pada server."}, 500
 
     return app
 

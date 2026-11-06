@@ -28,3 +28,8 @@ frontend/.next/
 frontend/out/
 node_modules/
 .next/
+
+# Agent Skills & Configs
+.agents/
+skills-lock.json
+

@@ -49,6 +49,10 @@ def process_route():
     if not user_query:
         return jsonify({"success": False, "message": "Permintaan tidak boleh kosong."}), 400
 
+    # Security: Batasi panjang input (threat modeling: DoS / buffer abuse)
+    if len(user_query) > 300:
+        return jsonify({"success": False, "message": "Teks instruksi perjalanan maksimal 300 karakter."}), 400
+
     # 1. NLP Ekstraksi
     nlp_result = gemini_service.extract_entities(user_query)
     origin_name = nlp_result.get('origin')

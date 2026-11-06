@@ -415,7 +415,7 @@ export default function HistoryPage() {
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
                 placeholder="Cari rute, asal, tujuan, atau tanggal (tekan '/' untuk cari)..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 bg-slate-50/50 hover:bg-white focus:bg-white transition"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 bg-slate-50/50 hover:bg-white focus:bg-white transition"
               />
             </div>
 

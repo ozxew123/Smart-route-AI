@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, User, Mail, Lock, UserPlus, ShieldCheck, AlertCircle, CheckCircle } from "lucide-react";
+import { User, Mail, Lock, UserPlus, ShieldCheck, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -62,17 +62,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-batik-kawung flex flex-col justify-center items-center p-4 relative">
-      {/* Tombol Kembali ke Beranda */}
-      <div className="w-full max-w-md mb-4 flex justify-between items-center">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-sky-700 hover:text-sky-900 bg-white/80 hover:bg-white backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-sm border border-sky-100 transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Kembali ke Beranda
-        </Link>
-      </div>
-
       {/* Auth Card */}
       <div className="w-full max-w-md bg-white/95 backdrop-blur-xl border border-sky-100 shadow-xl shadow-sky-950/5 rounded-3xl p-8 transition-all">
         {/* Brand Logo & Header */}

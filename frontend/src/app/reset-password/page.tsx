@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Mail, Lock, ShieldCheck, KeyRound, AlertCircle, CheckCircle } from "lucide-react";
+import { Mail, Lock, ShieldCheck, KeyRound, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -65,17 +65,6 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen bg-batik-kawung flex flex-col justify-center items-center p-4 relative">
-      {/* Tombol Navigasi Kembali */}
-      <div className="w-full max-w-md mb-4 flex justify-between items-center">
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-sky-700 hover:text-sky-900 bg-white/80 hover:bg-white backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-sm border border-sky-100 transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Kembali ke Masuk
-        </Link>
-      </div>
-
       {/* Auth Card */}
       <div className="w-full max-w-md bg-white/95 backdrop-blur-xl border border-sky-100 shadow-xl shadow-sky-950/5 rounded-3xl p-8 transition-all">
         {/* Brand Logo & Header */}

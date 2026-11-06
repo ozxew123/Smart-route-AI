@@ -1,4 +1,5 @@
 import requests
+import re
 from config import Config
 
 class MapService:
@@ -42,6 +43,42 @@ class MapService:
                     return res
         except Exception as e:
             print(f"[MapService] Geocoding error for '{location_name}': {e}")
+
+        # Fallback pencarian cerdas jika pencarian eksak pertama gagal
+        fallback_queries = []
+
+        # 1. Bersihkan frasa percakapan (deket rumah, dekat sini, sebelah, depan)
+        cleaned_no_filler = re.sub(r'\b(?:deket\s+rumah|dekat\s+rumah|deket|dekat|sebelah|depan|seberang)\b', '', location_name, flags=re.IGNORECASE).strip()
+        if cleaned_no_filler and cleaned_no_filler.lower() != key:
+            fallback_queries.append(cleaned_no_filler)
+
+        # 2. Tangani prefix gedung/apartemen/tower/menara/komplek/kantor (OSM sering menyimpan tanpa kata 'gedung')
+        cleaned_no_prefix = re.sub(r'^(?:gedung|apartemen|apt|tower|menara|komplek|perumahan|perum|kantor|kawasan)\s+', '', cleaned_no_filler or location_name, flags=re.IGNORECASE).strip()
+        if cleaned_no_prefix and cleaned_no_prefix.lower() != key and cleaned_no_prefix not in fallback_queries:
+            fallback_queries.append(cleaned_no_prefix)
+
+        # 3. Tambahkan konteks kota Jabodetabek / Indonesia jika belum ada
+        base_name = cleaned_no_prefix or cleaned_no_filler or location_name
+        if not any(city in key for city in ['jakarta', 'depok', 'bogor', 'tangerang', 'bekasi', 'indonesia']):
+            fallback_queries.append(f"{base_name}, DKI Jakarta")
+            fallback_queries.append(f"{base_name}, Indonesia")
+
+        for fq in fallback_queries:
+            try:
+                fb_resp = requests.get(self.nominatim_url, params={'q': fq, 'format': 'json', 'limit': 1}, headers=self.headers, timeout=5)
+                if fb_resp.status_code == 200:
+                    fb_data = fb_resp.json()
+                    if fb_data and len(fb_data) > 0:
+                        res = {
+                            "lat": float(fb_data[0]['lat']),
+                            "lon": float(fb_data[0]['lon']),
+                            "display_name": fb_data[0].get('display_name', location_name)
+                        }
+                        self._geocode_cache[key] = res
+                        return res
+            except Exception:
+                pass
+
         return None
 
     def get_route(self, origin_coords: dict, dest_coords: dict, vehicle: str = "motor"):
