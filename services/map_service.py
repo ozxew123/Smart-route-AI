@@ -4,6 +4,9 @@ from config import Config
 class MapService:
     """Service untuk Geocoding & Routing (Class Diagram: Map_Service)"""
 
+    _geocode_cache = {}
+    _route_cache = {}
+
     def __init__(self):
         self.nominatim_url = Config.NOMINATIM_BASE_URL
         self.osrm_url = Config.OSRM_BASE_URL
@@ -16,21 +19,27 @@ class MapService:
         Mengonversi nama tempat menjadi latitude dan longitude menggunakan Nominatim API.
         Return: {"lat": float, "lon": float, "display_name": str} atau None
         """
+        key = location_name.strip().lower()
+        if key in self._geocode_cache:
+            return self._geocode_cache[key]
+
         params = {
             'q': location_name,
             'format': 'json',
             'limit': 1
         }
         try:
-            response = requests.get(self.nominatim_url, params=params, headers=self.headers, timeout=8)
+            response = requests.get(self.nominatim_url, params=params, headers=self.headers, timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 if data and len(data) > 0:
-                    return {
+                    res = {
                         "lat": float(data[0]['lat']),
                         "lon": float(data[0]['lon']),
                         "display_name": data[0].get('display_name', location_name)
                     }
+                    self._geocode_cache[key] = res
+                    return res
         except Exception as e:
             print(f"[MapService] Geocoding error for '{location_name}': {e}")
         return None
@@ -41,6 +50,10 @@ class MapService:
         origin_coords: {"lat": ..., "lon": ...}
         dest_coords: {"lat": ..., "lon": ...}
         """
+        cache_key = f"{round(origin_coords['lat'], 4)},{round(origin_coords['lon'], 4)}-{round(dest_coords['lat'], 4)},{round(dest_coords['lon'], 4)}"
+        if cache_key in self._route_cache:
+            return self._route_cache[cache_key]
+
         # Profil OSRM publik default: car / driving
         profile = "driving"
         coordinates_str = f"{origin_coords['lon']},{origin_coords['lat']};{dest_coords['lon']},{dest_coords['lat']}"
@@ -65,7 +78,7 @@ class MapService:
                     
                     midpoint = self.get_route_midpoint(leaflet_coords)
                     
-                    return {
+                    result = {
                         "distance_km": round(route['distance'] / 1000, 2),
                         "duration_min": round(route['duration'] / 60, 1),
                         "coordinates": leaflet_coords,
@@ -73,6 +86,8 @@ class MapService:
                         "midpoint": midpoint,
                         "destination": {"lat": dest_coords['lat'], "lon": dest_coords['lon']}
                     }
+                    self._route_cache[cache_key] = result
+                    return result
         except Exception as e:
             print(f"[MapService] OSRM routing error: {e}")
         return None

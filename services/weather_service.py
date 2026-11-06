@@ -5,6 +5,8 @@ from config import Config
 class WeatherService:
     """Service untuk Mengambil Data Cuaca (Class Diagram: Weather_Service)"""
 
+    _weather_cache = {}
+
     def __init__(self):
         self.api_key = Config.OPENWEATHER_API_KEY
         self.base_url = Config.OPENWEATHER_BASE_URL
@@ -17,6 +19,17 @@ class WeatherService:
     def get_weather_at_point(self, lat: float, lon: float, label: str = "Titik"):
         """Mengambil data cuaca titik spesifik dari OpenWeatherMap API."""
         ref_time = self._get_current_time_str()
+
+        # Cache check (5 menit TTL)
+        cache_key = f"{round(lat, 2)},{round(lon, 2)}"
+        now_ts = datetime.now().timestamp()
+        if cache_key in self._weather_cache:
+            cached_data, cached_ts = self._weather_cache[cache_key]
+            if now_ts - cached_ts < 300:
+                res = dict(cached_data)
+                res["label"] = label
+                res["reference_time"] = ref_time
+                return res
 
         if not self.api_key or self.api_key == 'your_openweather_api_key_here':
             # Data simulasi informatif jika API key belum dikonfigurasi
@@ -58,7 +71,7 @@ class WeatherService:
                     api_dt = datetime.fromtimestamp(data['dt'], tz=timezone(timedelta(hours=7)))
                     ref_time = api_dt.strftime("%H:%M WIB")
 
-                return {
+                weather_result = {
                     "label": label,
                     "lat": lat,
                     "lon": lon,
@@ -73,6 +86,8 @@ class WeatherService:
                     "is_available": True,
                     "is_simulated": False
                 }
+                self._weather_cache[cache_key] = (weather_result, now_ts)
+                return weather_result
         except Exception as e:
             print(f"[WeatherService] Error fetching weather for {label} ({lat}, {lon}): {e}")
 

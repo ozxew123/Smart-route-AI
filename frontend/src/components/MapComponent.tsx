@@ -31,11 +31,18 @@ export default function MapComponent({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    // Inisialisasi peta Jabodetabek default
-    const map = L.map(mapContainerRef.current).setView([-6.3686, 106.8331], 12);
+    // Inisialisasi peta Jabodetabek default dengan Canvas Renderer cepat
+    const map = L.map(mapContainerRef.current, {
+      preferCanvas: true,
+      zoomControl: true,
+    }).setView([-6.3686, 106.8331], 12);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors",
+      maxZoom: 18,
+      keepBuffer: 2,
+      updateWhenIdle: true,
+      updateWhenZooming: false,
     }).addTo(map);
 
     const layerGroup = L.layerGroup().addTo(map);

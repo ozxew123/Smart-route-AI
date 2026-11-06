@@ -116,7 +116,10 @@ export default function HistoryPage() {
 
   const fetchHistories = async () => {
     try {
-      const res = await fetch("/api/history");
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const res = await fetch("/api/history", { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
