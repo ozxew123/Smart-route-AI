@@ -1,4 +1,5 @@
 import requests
+from datetime import datetime, timezone, timedelta
 from config import Config
 
 class WeatherService:
@@ -8,21 +9,30 @@ class WeatherService:
         self.api_key = Config.OPENWEATHER_API_KEY
         self.base_url = Config.OPENWEATHER_BASE_URL
 
+    def _get_current_time_str(self):
+        # Format WIB (UTC+7)
+        wib_time = datetime.now(timezone(timedelta(hours=7)))
+        return wib_time.strftime("%H:%M WIB")
+
     def get_weather_at_point(self, lat: float, lon: float, label: str = "Titik"):
         """Mengambil data cuaca titik spesifik dari OpenWeatherMap API."""
+        ref_time = self._get_current_time_str()
+
         if not self.api_key or self.api_key == 'your_openweather_api_key_here':
             # Data simulasi informatif jika API key belum dikonfigurasi
             return {
                 "label": label,
                 "lat": lat,
                 "lon": lon,
-                "condition": "Berawan Ringan (Simulasi)",
+                "condition": "Berawan Ringan",
                 "description": "cuaca berawan normal",
                 "temp_c": 29.5,
                 "humidity": 75,
                 "wind_speed_ms": 3.2,
                 "rain_prob": 15,
                 "icon": "03d",
+                "reference_time": ref_time,
+                "is_available": True,
                 "is_simulated": True
             }
 
@@ -43,6 +53,11 @@ class WeatherService:
                 wind_info = data.get('wind', {})
                 rain_info = data.get('rain', {})
 
+                # Jika ada dt dari API
+                if 'dt' in data:
+                    api_dt = datetime.fromtimestamp(data['dt'], tz=timezone(timedelta(hours=7)))
+                    ref_time = api_dt.strftime("%H:%M WIB")
+
                 return {
                     "label": label,
                     "lat": lat,
@@ -54,6 +69,8 @@ class WeatherService:
                     "wind_speed_ms": round(wind_info.get('speed', 0), 1),
                     "rain_1h_mm": rain_info.get('1h', 0),
                     "icon": weather_info.get('icon', '01d'),
+                    "reference_time": ref_time,
+                    "is_available": True,
                     "is_simulated": False
                 }
         except Exception as e:
@@ -64,14 +81,19 @@ class WeatherService:
             "lat": lat,
             "lon": lon,
             "condition": "Tidak Tersedia",
-            "description": "Gagal memuat data cuaca",
-            "is_available": False
+            "description": "Data cuaca titik ini sedang tidak dapat diakses",
+            "temp_c": None,
+            "humidity": None,
+            "icon": "50d",
+            "reference_time": ref_time,
+            "is_available": False,
+            "is_simulated": False
         }
 
     def sample_three_points(self, origin_coords: dict, midpoint_coords: dict, dest_coords: dict):
         """
         Mengambil sampel cuaca pada 3 titik rute: awal, tengah, dan akhir
-        (Sesuai Kebutuhan Fungsional FR-06).
+        (Sesuai Kebutuhan Fungsional FR-04).
         """
         origin_weather = self.get_weather_at_point(
             origin_coords['lat'], origin_coords['lon'], label="Titik Awal"
@@ -88,4 +110,3 @@ class WeatherService:
             "midpoint": mid_weather,
             "destination": dest_weather
         }
-

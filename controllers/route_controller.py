@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, redirect
 from services.gemini_service import GeminiService
 from services.map_service import MapService
 from services.weather_service import WeatherService
@@ -12,16 +12,24 @@ map_service = MapService()
 weather_service = WeatherService()
 
 @route_bp.route('/')
-@route_bp.route('/index.html')
 def index():
-    """Halaman Landing Page publik."""
-    return render_template('index.html')
+    """Mengalihkan akses root Flask ke antarmuka Next.js di port 3000."""
+    return redirect('http://localhost:3000')
 
 @route_bp.route('/home')
-@route_bp.route('/home.html')
 def home():
-    """Halaman Utama aplikasi asisten perjalanan."""
-    return render_template('home.html', user_name=session.get('user_name'))
+    """Mengalihkan akses rute home Flask ke antarmuka Next.js."""
+    return redirect('http://localhost:3000/home')
+
+@route_bp.route('/api/status', methods=['GET'])
+def api_status():
+    """Health check endpoint untuk SmartRoute AI Backend API."""
+    return jsonify({
+        "status": "online",
+        "service": "SmartRoute AI Flask Backend",
+        "frontend": "http://localhost:3000",
+        "version": "2.0.0"
+    })
 
 @route_bp.route('/api/process-route', methods=['POST'])
 def process_route():
@@ -47,7 +55,7 @@ def process_route():
     dest_name = nlp_result.get('destination')
     vehicle = override_vehicle or nlp_result.get('vehicle', 'motor')
 
-    # Validasi kelengkapan informasi (FR-03: Minta klarifikasi jika kurang)
+    # Validasi kelengkapan informasi (FR-06: Minta klarifikasi jika kurang)
     if not origin_name or not dest_name:
         missing = []
         if not origin_name: missing.append("lokasi asal")
@@ -82,7 +90,7 @@ def process_route():
             "message": "Tidak dapat menemukan rute perjalanan antara kedua titik tersebut."
         }), 404
 
-    # 4. Sampling Cuaca 3 Titik
+    # 4. Sampling Cuaca 3 Titik (FR-04)
     weather_3pts = weather_service.sample_three_points(
         origin_coords=route_data['origin'],
         midpoint_coords=route_data['midpoint'],
@@ -133,4 +141,3 @@ def process_route():
         "advice": final_advice,
         "history_id": history_id
     })
-

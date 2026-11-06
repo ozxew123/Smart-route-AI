@@ -21,6 +21,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import UserNavDropdown from "@/components/UserNavDropdown";
 
 const demoData = [
   {
@@ -73,7 +74,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-hidden">
       
       {/* Navbar */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
+      <header className="sticky top-0 z-[100] bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 font-extrabold text-lg text-slate-900 tracking-tight">
             <div className="relative w-8 h-8 rounded-lg overflow-hidden shadow-sm flex-shrink-0">
@@ -89,21 +90,19 @@ export default function LandingPage() {
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600">
             <a href="#fitur" className="hover:text-sky-600 transition-colors">Fitur Utama</a>
             <a href="#cara-kerja" className="hover:text-sky-600 transition-colors">Cara Kerja</a>
-            <Link href="/history" className="hover:text-sky-600 transition-colors">Riwayat</Link>
+            <a href="#simulasi" className="hover:text-sky-600 transition-colors">Simulasi Rute</a>
           </nav>
 
           {/* Desktop CTA */}
           <div className="hidden sm:flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-sky-600 px-3 py-1.5 transition-colors">
-              Masuk
-            </Link>
             <Link
               href="/home"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 px-4 py-2 rounded-full shadow-md shadow-sky-600/20 transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 px-4 py-2 rounded-full shadow-md shadow-sky-600/20 transition-all hover:-translate-y-0.5"
             >
-              <span>Rencanakan Rute</span>
+              <span>Rencana Rute</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
+            <UserNavDropdown />
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -139,6 +138,13 @@ export default function LandingPage() {
               className="block py-2 text-sm font-semibold text-slate-700 hover:text-sky-600"
             >
               Dashboard Riwayat
+            </Link>
+            <Link
+              href="/profile"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block py-2 text-sm font-semibold text-slate-700 hover:text-sky-600"
+            >
+              Profil & Preferensi AI
             </Link>
             <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
               <Link
@@ -181,7 +187,7 @@ export default function LandingPage() {
           <p className="text-sm sm:text-base lg:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mb-8 px-2">
             Navigasi biasa hanya mencari rute terpendek. SmartRoute AI memadukan{" "}
             <strong className="text-slate-800">pemrosesan bahasa alami (NLP)</strong> dan{" "}
-            <strong className="text-slate-800">analisis cuaca 3 titik</strong> agar Anda siap sebelum hujan menghadang di jalan.
+            <strong className="text-slate-800">pemantauan cuaca 3 titik</strong> agar Anda siap sebelum hujan menghadang di jalan.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-xs sm:max-w-none mx-auto mb-10 sm:mb-12">
@@ -201,39 +207,27 @@ export default function LandingPage() {
           </div>
 
           {/* Stats Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto pt-4 border-t border-slate-200/80 mb-10 text-left">
-            <div className="flex items-center gap-3 p-2 bg-white/60 sm:bg-transparent rounded-xl border sm:border-0 border-slate-100">
-              <CloudSun className="w-6 h-6 text-sky-600 flex-shrink-0" />
-              <div className="text-xs text-slate-600 font-medium leading-tight">
-                <span className="font-bold text-slate-900 block">Cuaca 3 Titik</span>
-                Awal, Tengah & Akhir
-              </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 max-w-4xl mx-auto pt-4 border-t border-slate-200/80 mb-10 text-xs text-slate-600 font-medium">
+            <div className="inline-flex items-center gap-2">
+              <CloudSun className="w-4 h-4 text-sky-600 flex-shrink-0" />
+              <span>Analisis Cuaca 3 Titik (Awal, Tengah, Akhir)</span>
             </div>
-            <div className="flex items-center gap-3 p-2 bg-white/60 sm:bg-transparent rounded-xl border sm:border-0 border-slate-100">
-              <Mic className="w-6 h-6 text-sky-600 flex-shrink-0" />
-              <div className="text-xs text-slate-600 font-medium leading-tight">
-                <span className="font-bold text-slate-900 block">Input Suara & Teks</span>
-                NLP Bahasa Sehari-hari
-              </div>
+            <div className="inline-flex items-center gap-2">
+              <Mic className="w-4 h-4 text-sky-600 flex-shrink-0" />
+              <span>Input Suara & Teks Bebas (NLP)</span>
             </div>
-            <div className="flex items-center gap-3 p-2 bg-white/60 sm:bg-transparent rounded-xl border sm:border-0 border-slate-100">
-              <ShieldCheck className="w-6 h-6 text-sky-600 flex-shrink-0" />
-              <div className="text-xs text-slate-600 font-medium leading-tight">
-                <span className="font-bold text-slate-900 block">Safety Advisor</span>
-                Rekomendasi Berbasis Data
-              </div>
+            <div className="inline-flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-sky-600 flex-shrink-0" />
+              <span>AI Safety Advisor Deterministik</span>
             </div>
-            <div className="flex items-center gap-3 p-2 bg-white/60 sm:bg-transparent rounded-xl border sm:border-0 border-slate-100">
-              <Zap className="w-6 h-6 text-sky-600 flex-shrink-0" />
-              <div className="text-xs text-slate-600 font-medium leading-tight">
-                <span className="font-bold text-slate-900 block">&lt; 1 Detik</span>
-                Routing OSRM Cepat
-              </div>
+            <div className="inline-flex items-center gap-2">
+              <Zap className="w-4 h-4 text-sky-600 flex-shrink-0" />
+              <span>Respon Rute Cepat (&lt; 1 Detik)</span>
             </div>
           </div>
 
           {/* Interactive Preview Simulator Card */}
-          <div className="max-w-3xl mx-auto text-left bg-white border border-slate-200 rounded-3xl p-4 sm:p-7 shadow-xl shadow-slate-200/50 relative">
+          <div id="simulasi" className="scroll-mt-24 max-w-3xl mx-auto text-left bg-white border border-slate-200 rounded-3xl p-4 sm:p-7 shadow-xl shadow-slate-200/50 relative">
             
             {/* Topbar: Presets & Badge */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -353,7 +347,7 @@ export default function LandingPage() {
       </section>
 
       {/* Feature Section */}
-      <section id="fitur" className="py-14 sm:py-20 bg-white border-t border-slate-200">
+      <section id="fitur" className="scroll-mt-20 py-14 sm:py-20 bg-white border-t border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-xs font-bold text-sky-600 uppercase tracking-wider mb-2 block">
@@ -397,6 +391,79 @@ export default function LandingPage() {
                 Decision engine cerdas yang memberikan panduan keselamatan proaktif seperti peringatan jas hujan setelan, perlambatan kecepatan, dan evaluasi aspal licin.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="cara-kerja" className="scroll-mt-20 py-14 sm:py-20 bg-slate-50/80 border-t border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs font-bold text-sky-600 uppercase tracking-wider mb-2 block">
+              Alur Kerja Sistem
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Hanya Tiga Langkah Cepat
+            </h2>
+            <p className="text-sm text-slate-500 mt-2">
+              Dari kalimat instruksi Anda hingga rute teraman tersaji jelas di layar.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+            {/* Step 1 */}
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full w-fit mb-4">
+                Langkah 01
+              </div>
+              <h3 className="font-bold text-lg text-slate-900 mb-2">Ketik atau Sebutkan Rute</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Gunakan bahasa santai sehari-hari melalui ketikan teks atau tekan tombol mikrofon untuk menyebutkan asal, tujuan, dan kendaraan Anda.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full w-fit mb-4">
+                Langkah 02
+              </div>
+              <h3 className="font-bold text-lg text-slate-900 mb-2">Analisis Jalur & Cuaca Multi-Titik</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Mesin routing OSRM menghitung geometri jalan tercepat dan OpenWeatherMap menyuplai kondisi cuaca riil di titik awal, tengah, dan akhir.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full w-fit mb-4">
+                Langkah 03
+              </div>
+              <h3 className="font-bold text-lg text-slate-900 mb-2">Panduan Keselamatan & Mulai Jalan</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Dapatkan estimasi waktu tempuh, visualisasi peta rute interaktif, serta rekomendasi keselamatan AI sebelum hujan menghadang di jalan.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-14 sm:py-16 bg-gradient-to-br from-sky-600 via-sky-700 to-indigo-800 text-white text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
+          <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-4">
+            Siap Hadapi Cuaca di Jalan dengan Lebih Percaya Diri?
+          </h2>
+          <p className="text-sm sm:text-base text-sky-100 max-w-2xl mx-auto leading-relaxed mb-8">
+            Hindari terjebak hujan badai tanpa persiapan. Gunakan SmartRoute AI sekarang untuk perjalanan harian yang lebih aman dan terencana.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/home"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-sky-700 hover:bg-sky-50 font-bold px-7 py-3.5 rounded-full shadow-lg transition-transform hover:-translate-y-0.5 text-sm sm:text-base"
+            >
+              <span>Mulai Rencana Rute Sekarang</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>

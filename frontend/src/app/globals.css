@@ -11,6 +11,10 @@
   --text-main: #0F172A;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   color: #0F172A;
   background-color: #F8FAFC;

@@ -10,25 +10,35 @@ class DecisionEngine:
         rain_detected = False
         rain_locations = []
         high_wind = False
+        missing_weather = []
+        primary_weather_icon = "01d"
 
         for key, w in weather_3points.items():
+            label = w.get('label', key)
+            if not w.get('is_available', True):
+                missing_weather.append(label)
+                continue
+
             cond = str(w.get('condition', '')).lower()
             desc = str(w.get('description', '')).lower()
-            label = w.get('label', key)
             
             # Cek potensi hujan atau badai
             if any(term in cond or term in desc for term in ['rain', 'hujan', 'drizzle', 'thunderstorm', 'badai']):
                 rain_detected = True
                 rain_locations.append(label)
+                primary_weather_icon = w.get('icon', '10d')
 
             # Cek kecepatan angin di atas 8 m/s (~29 km/jam)
             if w.get('wind_speed_ms', 0) > 8:
                 high_wind = True
 
+            if not rain_detected and w.get('icon'):
+                primary_weather_icon = w.get('icon')
+
         risk_level = "Rendah"
         if rain_detected:
             risk_level = "Tinggi" if vehicle == "motor" else "Sedang"
-        elif high_wind:
+        elif high_wind or missing_weather:
             risk_level = "Sedang"
 
         return {
@@ -36,6 +46,8 @@ class DecisionEngine:
             "rain_detected": rain_detected,
             "rain_locations": rain_locations,
             "high_wind": high_wind,
+            "missing_weather": missing_weather,
+            "primary_weather_icon": primary_weather_icon,
             "vehicle": vehicle
         }
 
@@ -48,29 +60,33 @@ class DecisionEngine:
             loc_str = ", ".join(risk_analysis["rain_locations"])
             if vehicle == "motor":
                 advice_points.append(
-                    f"⚠️ Terdeteksi hujan/gerimis di area ({loc_str}). Siapkan jas hujan sebelum berangkat dan periksa ban serta rem motor."
+                    f"⚠️ Terdeteksi potensi hujan/gerimis di area ({loc_str}). Pengendara sepeda motor sangat disarankan menyiapkan jas hujan setelan sebelum berangkat dan memeriksa cengkeraman ban serta kampas rem."
                 )
                 advice_points.append(
-                    "Kurangi kecepatan, jaga jarak pengereman lebih jauh dari kendaraan di depan, dan hindari berteduh di bawah pohon rindang/flyover."
+                    "Kurangi kecepatan hingga maksimal 40 km/jam saat aspal basah, hindari pengereman mendadak di atas marka jalan yang licin, dan jangan berteduh di bawah flyover yang mengganggu lalu lintas."
                 )
             else:
                 advice_points.append(
-                    f"⚠️ Jalanan basah terdeteksi di ({loc_str}). Nyalakan lampu utama, pastikan wiper berfungsi baik, dan jaga jarak aman."
+                    f"⚠️ Jalanan basah terdeteksi di ({loc_str}). Nyalakan lampu utama mobil, pastikan wiper berfungsi optimal, dan tingkatkan jarak aman antar kendaraan."
                 )
         else:
-            advice_points.append("☀️ Kondisi rute diprakirakan relatif bersahabat.")
+            advice_points.append("☀️ Kondisi cuaca di sepanjang rute relatif cerah dan kondusif.")
             if vehicle == "motor":
-                advice_points.append("Gunakan helm berstandar SNI, jaket, dan periksa tekanan angin ban sebelum berkendara.")
+                advice_points.append("Gunakan perlengkapan berkendara standar: helm SNI tertutup, jaket pelindung angin, dan sarung tangan.")
             else:
-                advice_points.append("Gunakan sabuk keselamatan dan patuhi rambu batas kecepatan.")
+                advice_points.append("Gunakan sabuk keselamatan dan jaga kewaspadaan terhadap pengendara lain.")
 
         if risk_analysis.get("high_wind"):
-            advice_points.append("Waspadai hembusan angin kencang di jalan terbuka atau jembatan layang.")
+            advice_points.append("Waspadai hembusan angin samping kencang saat melintasi jembatan layang atau area terbuka.")
 
-        if distance_km > 30:
-            advice_points.append(f"Perjalanan cukup jauh ({distance_km} km). Luangkan waktu beristirahat jika merasa lelah.")
+        if risk_analysis.get("missing_weather"):
+            missing_str = ", ".join(risk_analysis["missing_weather"])
+            advice_points.append(
+                f"(Catatan Keterbatasan Data: Sensor cuaca di area {missing_str} sedang tidak dapat diakses, harap tetap waspada terhadap perubahan awan lokal)."
+            )
 
-        advice_points.append("Perhatian: Saran ini bersifat informatif. Pengendara tetap wajib mematuhi aturan lalu lintas dan kondisi faktual di jalan.")
+        if distance_km > 25:
+            advice_points.append(f"Perjalanan tergolong cukup jauh ({distance_km} km). Luangkan waktu untuk istirahat jika merasa lelah.")
 
+        advice_points.append("Patuhi selalu rambu lalu lintas demi keselamatan bersama.")
         return " ".join(advice_points)
-

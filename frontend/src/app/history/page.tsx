@@ -27,6 +27,7 @@ import {
   LogOut,
   Radio
 } from "lucide-react";
+import UserNavDropdown from "@/components/UserNavDropdown";
 
 interface HistoryItem {
   id: number;
@@ -238,7 +239,7 @@ export default function HistoryPage() {
       {/* ==============================================================
            NAVBAR
            ============================================================== */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-sm">
+      <header className="sticky top-0 z-[100] bg-white border-b border-slate-200/80 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center p-1 border border-sky-100 shadow-sm">
@@ -252,24 +253,19 @@ export default function HistoryPage() {
             </div>
           </Link>
 
-          <nav className="flex items-center gap-4 sm:gap-6 text-sm font-semibold">
-            <Link href="/home" className="text-slate-600 hover:text-sky-600 flex items-center gap-1.5 transition">
-              <Compass className="w-4 h-4" />
-              <span>Rencana Rute</span>
-            </Link>
-            <Link href="/history" className="text-sky-600 flex items-center gap-1.5 transition">
-              <Clock className="w-4 h-4" />
-              <span>Riwayat</span>
-            </Link>
-            <div className="h-4 w-px bg-slate-200" />
-            <Link
-              href="/login"
-              className="text-xs text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-full border border-rose-200 flex items-center gap-1.5 transition"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Keluar</span>
-            </Link>
-          </nav>
+          <div className="flex items-center gap-3 sm:gap-5">
+            <nav className="flex items-center gap-3 sm:gap-5 text-xs sm:text-sm font-semibold">
+              <Link href="/home" className="text-slate-600 hover:text-sky-600 flex items-center gap-1.5 transition">
+                <Compass className="w-4 h-4" />
+                <span>Rencana Rute</span>
+              </Link>
+              <Link href="/history" className="text-sky-600 flex items-center gap-1.5 transition">
+                <Clock className="w-4 h-4" />
+                <span>Riwayat</span>
+              </Link>
+            </nav>
+            <UserNavDropdown />
+          </div>
         </div>
       </header>
 

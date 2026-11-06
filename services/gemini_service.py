@@ -56,6 +56,17 @@ Teks Pengguna: "{user_query}"
         # Heuristic Rule-Based Fallback jika API key belum diset
         return self._heuristic_extract(user_query)
 
+    def _clean_location_name(self, name: str) -> str:
+        """Membersihkan nama lokasi dari kata sambung moda dan preferensi."""
+        if not name:
+            return ""
+        # Bersihkan kata-kata moda transportasi dan preferensi
+        cleaned = re.sub(r'\b(naik|pake|pakai|menggunakan|bawa|dengan)\s+(sepeda\s+motor|motor|mobil|kendaraan)\b', '', name, flags=re.IGNORECASE)
+        cleaned = re.sub(r'\b(jangan\s+lewat|hindari|lewat|santai|cepat|buru-buru)\b.*', '', cleaned, flags=re.IGNORECASE)
+        # Bersihkan tanda baca berlebih di ujung
+        cleaned = re.sub(r'[,.\-_]+$', '', cleaned).strip()
+        return cleaned
+
     def _heuristic_extract(self, query: str) -> dict:
         """Fallback ekstraksi pola kalimat berbahasa Indonesia sederhana."""
         text = query.lower()
@@ -71,13 +82,13 @@ Teks Pengguna: "{user_query}"
         # Pola "dari [origin] ke/menuju [destination]"
         match = re.search(r'dari\s+([a-zA-Z0-9\s,\.]+?)\s+(?:ke|menuju|sampai)\s+([a-zA-Z0-9\s,\.]+)', text)
         if match:
-            origin = match.group(1).strip()
-            destination = match.group(2).strip()
+            origin = self._clean_location_name(match.group(1))
+            destination = self._clean_location_name(match.group(2))
         else:
             # Pola "ke/menuju [destination]"
             match_dest = re.search(r'(?:ke|menuju|sampai)\s+([a-zA-Z0-9\s,\.]+)', text)
             if match_dest:
-                destination = match_dest.group(1).strip()
+                destination = self._clean_location_name(match_dest.group(1))
 
         complete = bool(origin and destination)
         return {
