@@ -287,7 +287,7 @@ function HomeContent() {
 
   return (
     <div className="min-h-[100dvh] bg-[#F8FAFC] flex flex-col font-sans">
-      
+
       {/* Top Navbar with Safe Area Support */}
       <header className="sticky top-0 z-[100] bg-white border-b border-slate-200 pt-[env(safe-area-inset-top)]">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between">
@@ -296,9 +296,7 @@ function HomeContent() {
               <Image src="/images/logo.png" alt="SmartRoute Logo" width={28} height={28} className="object-contain" />
             </div>
             <span>SmartRoute AI</span>
-            <span className="text-[9px] sm:text-[10px] font-bold bg-sky-600 text-white px-2 py-0.5 rounded-full uppercase tracking-wider hidden xs:inline">
-              Navigator
-            </span>
+
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-5">
@@ -321,42 +319,42 @@ function HomeContent() {
       {/* Main Workspace */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
-          
+
           {/* ========================================================
                KOLOM KIRI: INPUT PINTAR, ASISTEN AI, KLARIFIKASI, RUTE
                ======================================================== */}
           <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5">
-            
+
             {/* FR-01: Panel Input Pintar (Teks & Suara) */}
             <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-1">
+              <div className="mb-1">
                 <h5 className="font-extrabold text-slate-900 text-base sm:text-lg flex items-center gap-2">
                   <Compass className="w-5 h-5 text-sky-600" />
-                  <span>Asisten Rute & Cuaca</span>
+                  <span>Rencanakan perjalanan</span>
                 </h5>
-                <span className="text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-full">
-                  Groq AI LPU
-                </span>
+
               </div>
               <p className="text-xs text-slate-500 mb-3 sm:mb-4 leading-relaxed">
-                Ketik instruksi rute dalam bahasa santai atau tekan tombol mikrofon untuk input suara.
+                Masukkan lokasi awal dan tujuan. Contoh: Margonda ke Kampus F4.
               </p>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
                 <div>
+                  <label htmlFor="route-query" className="block text-xs font-semibold text-slate-700 mb-1.5">Lokasi awal dan tujuan</label>
                   <div className="relative">
                     <textarea
-                      rows={3}
+                      id="route-query"
+                      rows={2}
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Contoh: Dari Margonda Depok ke Tebet Eco Park naik motor jangan lewat jalan licin..."
+                      placeholder="Contoh: Margonda, Depok ke Kampus F4"
                       required
                       className="w-full text-base sm:text-sm font-medium bg-slate-50/80 border border-slate-200 rounded-2xl p-3.5 pr-12 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all resize-none"
                     />
                     <button
                       type="button"
                       onClick={toggleVoice}
-                      title="Gunakan Input Suara (Web Speech API)"
+                      title="Isi dengan suara"
                       className={`absolute right-3 top-3 p-2 rounded-xl border transition-all ${
                         isRecording
                           ? "bg-rose-500 text-white border-rose-600 animate-pulse shadow-md"
@@ -369,44 +367,14 @@ function HomeContent() {
                   {isRecording && (
                     <span className="text-[11px] text-rose-600 font-semibold mt-1.5 inline-flex items-center gap-1.5 animate-fadeIn">
                       <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                      Mendengarkan suara Anda via Web Speech API...
+                      Mendengarkan...
                     </span>
                   )}
                 </div>
 
-                {/* Quick Presets */}
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Contoh Cepat Skenario:
-                  </span>
-                  <div className="flex gap-1.5 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => applyPreset("Dari Margonda Depok ke Tebet Eco Park naik motor", "motor")}
-                      className="text-[11px] font-semibold bg-slate-50 hover:bg-sky-50 hover:text-sky-700 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-full transition"
-                    >
-                      🏍️ Margonda ➔ Tebet
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => applyPreset("Kampus D Margonda ke Bundaran HI naik motor", "motor")}
-                      className="text-[11px] font-semibold bg-slate-50 hover:bg-sky-50 hover:text-sky-700 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-full transition"
-                    >
-                      🏍️ Depok ➔ Bundaran HI
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => applyPreset("Dari Cibubur ke Monas Jakarta Pusat bawa mobil", "mobil")}
-                      className="text-[11px] font-semibold bg-slate-50 hover:bg-sky-50 hover:text-sky-700 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-full transition"
-                    >
-                      🚗 Cibubur ➔ Monas
-                    </button>
-                  </div>
-                </div>
-
                 {/* Moda Kendaraan (Focus: Pengendara Sepeda Motor) */}
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1.5">Moda Kendaraan:</label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">Kendaraan</label>
                   <div className="grid grid-cols-2 gap-2.5">
                     <button
                       type="button"
@@ -445,12 +413,12 @@ function HomeContent() {
                   {isLoading ? (
                     <>
                       <RotateCw className="w-4 h-4 animate-spin" />
-                      <span>Menganalisis Rute & Cuaca...</span>
+                      <span>Mencari rute...</span>
                     </>
                   ) : (
                     <>
                       <Search className="w-4 h-4" />
-                      <span>Analisis Rute & Cuaca</span>
+                      <span>Cari rute</span>
                     </>
                   )}
                 </button>
@@ -482,8 +450,8 @@ function HomeContent() {
                     <MessageSquare className="w-4 h-4" />
                   </div>
                   <div>
-                    <h6 className="font-extrabold text-sm text-slate-900 mb-0">Asisten SmartRoute Butuh Klarifikasi</h6>
-                    <span className="text-[11px] text-sky-700">FR-06 Dialog Klarifikasi Rute</span>
+                    <h6 className="font-extrabold text-sm text-slate-900 mb-0">Lengkapi lokasi perjalanan</h6>
+
                   </div>
                 </div>
 
@@ -559,8 +527,8 @@ function HomeContent() {
                       <ShieldCheck className="w-5 h-5" />
                     </div>
                     <div>
-                      <h6 className="font-extrabold text-slate-900 text-sm mb-0">AI Safety Advisor</h6>
-                      <span className="text-[10px] text-slate-400">Rekomendasi Keselamatan Komuter</span>
+                      <h6 className="font-extrabold text-slate-900 text-sm mb-0">Saran keselamatan</h6>
+                      <span className="text-[10px] text-slate-400"></span>
                     </div>
                   </div>
 
@@ -587,8 +555,8 @@ function HomeContent() {
                   <div>
                     <div className="text-xs font-bold text-slate-800">
                       {resultData.risk?.rain_detected
-                        ? "⚠️ Terpantau Potensi Hujan di Rute"
-                        : "☀️ Cuaca Kondusif & Terang"}
+                        ? "⚠️ Ada kemungkinan hujan di rute"
+                        : "☀️ Cuaca cukup cerah"}
                     </div>
                     <div className="text-[11px] text-slate-500">
                       {resultData.risk?.rain_locations && resultData.risk.rain_locations.length > 0
@@ -616,25 +584,25 @@ function HomeContent() {
                     </div>
                     <div>
                       <h6 className="font-extrabold text-slate-900 text-sm mb-0">
-                        Jas Hujan Pitstop Predictor
+                        Saran tempat berteduh
                       </h6>
                       <span className="text-[10px] text-violet-700 font-semibold">
-                        Fitur Proteksi Pemotor Sebelum Kehujanan
+                        Lokasi singgah sebelum hujan
                       </span>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-300 px-2.5 py-1 rounded-full uppercase">
-                    Pitstop Aktif
+                    Saran cuaca
                   </span>
                 </div>
 
                 <div className="bg-white/90 rounded-2xl p-3.5 border border-violet-100 mb-3 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Rekomendasi Titik Singgah:</span>
+                    <span className="text-slate-500">Tempat singgah:</span>
                     <strong className="text-violet-950 text-right">{resultData.pitstop.shelter_name}</strong>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Jarak Sebelum Titik Hujan:</span>
+                    <span className="text-slate-500">Jarak sebelum hujan:</span>
                     <span className="font-bold text-violet-700">± {resultData.pitstop.distance_before_km} km</span>
                   </div>
                   <div className="text-[11px] text-slate-600 pt-1 border-t border-slate-100 flex items-center gap-1.5">
@@ -671,7 +639,7 @@ function HomeContent() {
                     </div>
                     <div>
                       <h6 className="font-extrabold text-slate-900 text-sm mb-0">
-                        Zero-Tilang Guard
+                        Info aturan jalan
                       </h6>
                       <span
                         className={`text-[10px] font-semibold ${
@@ -679,8 +647,8 @@ function HomeContent() {
                         }`}
                       >
                         {resultData.zero_tilang.rule_type === "motor_guard"
-                          ? "Proteksi Motor: Bebas JLNT Casablanca & Flyover Terlarang"
-                          : "Khusus Mobil: Kepatuhan Ganjil-Genap Protokol DKI Jakarta"}
+                          ? "Rute menghindari jalan yang tidak boleh dilalui motor."
+                          : "Periksa aturan ganjil-genap untuk mobil di Jakarta."}
                       </span>
                     </div>
                   </div>
@@ -723,27 +691,27 @@ function HomeContent() {
               <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm animate-fadeIn">
                 <h6 className="font-extrabold text-slate-900 text-sm mb-3 flex items-center gap-2">
                   <Compass className="w-4 h-4 text-sky-600" />
-                  <span>Detail Rute Perjalanan (FR-03)</span>
+                  <span>Ringkasan perjalanan</span>
                 </h6>
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between py-1.5 border-b border-slate-100">
-                    <span className="text-slate-500">Titik Awal (Origin):</span>
+                    <span className="text-slate-500">Titik awal:</span>
                     <strong className="text-slate-900 text-right">{resultData.entities?.origin || "-"}</strong>
                   </div>
                   <div className="flex justify-between py-1.5 border-b border-slate-100">
-                    <span className="text-slate-500">Titik Tujuan (Destination):</span>
+                    <span className="text-slate-500">Tujuan:</span>
                     <strong className="text-slate-900 text-right">{resultData.entities?.destination || "-"}</strong>
                   </div>
                   <div className="flex justify-between py-1.5 border-b border-slate-100">
-                    <span className="text-slate-500">Total Jarak Tempuh:</span>
+                    <span className="text-slate-500">Jarak:</span>
                     <strong className="text-sky-600 font-extrabold">{resultData.route.distance_km} km</strong>
                   </div>
                   <div className="flex justify-between py-1.5 border-b border-slate-100">
-                    <span className="text-slate-500">Estimasi Waktu Tempuh:</span>
+                    <span className="text-slate-500">Perkiraan waktu:</span>
                     <strong className="text-slate-900">~{resultData.route.duration_min} menit</strong>
                   </div>
                   <div className="flex justify-between py-1.5">
-                    <span className="text-slate-500">Moda Transportasi:</span>
+                    <span className="text-slate-500">Kendaraan:</span>
                     <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200 capitalize">
                       {vehicle === "mobil" ? "Mobil Pribadi" : "Sepeda Motor"}
                     </span>
@@ -758,19 +726,19 @@ function HomeContent() {
                KOLOM KANAN: SAMPLING CUACA 3 TITIK (FR-04) & MAP CANVAS (FR-02)
                ======================================================== */}
           <div className="lg:col-span-7 flex flex-col gap-4">
-            
+
             {/* FR-04: Informasi Cuaca 3 Titik Spesifik dengan WAKTU ACUAN */}
             {resultData && resultData.weather && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fadeIn">
+              <div className="space-y-3">
+                <h2 className="text-sm font-semibold text-slate-800">Cuaca sepanjang perjalanan</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fadeIn">
                 {/* Titik Awal */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-emerald-500">
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="mb-1">
                     <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider">
                       Titik Awal
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      🕒 {resultData.weather.origin.reference_time || "08:00 WIB"}
-                    </span>
+
                   </div>
                   <div className="font-bold text-slate-900 text-xs truncate">
                     {resultData.entities?.origin || resultData.weather.origin.name || "Titik Keberangkatan"}
@@ -785,15 +753,13 @@ function HomeContent() {
                   </div>
                 </div>
 
-                {/* Titik Tengah (Midpoint) */}
+                {/* Titik Tengah */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-amber-500">
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="mb-1">
                     <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-wider">
-                      Titik Tengah (Midpoint)
+                      Titik Tengah
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      🕒 {resultData.weather.midpoint.reference_time || "08:00 WIB"}
-                    </span>
+
                   </div>
                   <div className="font-bold text-slate-900 text-xs truncate">
                     {resultData.weather.midpoint.name || "Sampling Jalur Tengah"}
@@ -810,13 +776,11 @@ function HomeContent() {
 
                 {/* Titik Akhir */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-rose-500">
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="mb-1">
                     <span className="text-[10px] font-extrabold text-rose-600 uppercase tracking-wider">
                       Titik Akhir
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      🕒 {resultData.weather.destination.reference_time || "08:00 WIB"}
-                    </span>
+
                   </div>
                   <div className="font-bold text-slate-900 text-xs truncate">
                     {resultData.entities?.destination || resultData.weather.destination.name || "Titik Kedatangan"}
@@ -830,6 +794,7 @@ function HomeContent() {
                     </span>
                   </div>
                 </div>
+              </div>
               </div>
             )}
 
@@ -873,7 +838,7 @@ function HomeContent() {
 
             {/* Info Footer Note */}
             <div className="flex justify-between items-center text-[11px] text-slate-400 px-2">
-              <span>Leaflet.js Canvas • OSRM Routing Engine • OpenWeatherMap Multi-Point Sampling</span>
+              <span>Peta rute</span>
               <span>SmartRoute AI</span>
             </div>
 
