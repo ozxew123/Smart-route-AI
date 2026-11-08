@@ -93,15 +93,32 @@ export async function POST(req: NextRequest) {
       baseAdvice
     );
 
-    // 6. Simpan ke Riwayat di Supabase jika pengguna sedang login
+    // 6. Simpan ke Riwayat di Supabase
     let historyId: number | null = null;
     const session = getSessionUser();
-    if (session?.userId) {
+    let targetUserId = session?.userId || body.userId;
+
+    // Jika tidak ada session userId, ambil user ID terakhir dari database Supabase
+    if (!targetUserId) {
       try {
-        const { data: insertedHistory } = await supabase
+        const { data: latestUser } = await supabase
+          .from("users")
+          .select("id")
+          .order("id", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (latestUser?.id) {
+          targetUserId = latestUser.id;
+        }
+      } catch {}
+    }
+
+    if (targetUserId) {
+      try {
+        const { data: insertedHistory, error: insErr } = await supabase
           .from("search_histories")
           .insert({
-            user_id: session.userId,
+            user_id: targetUserId,
             raw_query: userQuery,
             origin: originName,
             destination: destName,
@@ -116,8 +133,11 @@ export async function POST(req: NextRequest) {
           .select("id")
           .maybeSingle();
 
-        if (insertedHistory) {
+        if (insErr) {
+          console.error("[RouteAPI] Supabase insert error:", insErr);
+        } else if (insertedHistory) {
           historyId = insertedHistory.id;
+          console.log("[RouteAPI] Riwayat berhasil disimpan ke Supabase dengan ID:", historyId);
         }
       } catch (err) {
         console.warn("[RouteAPI] Gagal menyimpan riwayat:", err);

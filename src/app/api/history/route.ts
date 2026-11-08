@@ -2,22 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { getSessionUser } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = getSessionUser();
-    // Jika belum login, gunakan demo id (1) atau return array kosong
-    const userId = session?.userId || 1;
+    const url = new URL(req.url);
+    const queryUserId = url.searchParams.get("userId");
 
-    const { data: rows, error } = await supabase
+    let userId = session?.userId || (queryUserId ? parseInt(queryUserId, 10) : null);
+
+    let query = supabase
       .from("search_histories")
       .select("*")
-      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(30);
 
+    if (userId) {
+      query = query.eq("user_id", userId);
+    }
+
+    const { data: rows, error } = await query;
+
     if (error) {
       console.error("[HistoryAPI] Supabase error:", error);
-      return NextResponse.json({ success: false, data: [] }, { status: 500 });
+      return NextResponse.json([], { status: 200 });
     }
 
     const results = (rows || []).map((row) => {
@@ -47,16 +54,10 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: results,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json(results, { status: 200 });
   } catch (err: any) {
     console.error("[HistoryAPI] Exception:", err);
-    return NextResponse.json({ success: false, data: [] }, { status: 500 });
+    return NextResponse.json([], { status: 200 });
   }
 }
 

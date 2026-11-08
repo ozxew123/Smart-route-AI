@@ -129,13 +129,14 @@ export default function HistoryPage() {
   const fetchHistories = async () => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
       const res = await fetch("/api/history", { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setHistories(data);
+        const items = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+        if (items.length > 0) {
+          setHistories(items);
           return;
         }
       }
