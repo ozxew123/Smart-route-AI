@@ -182,7 +182,7 @@ export default function HistoryPage() {
   const avgMin = histories.length > 0 ? Math.round(totalMin / histories.length) : 0;
 
   return (
-    <div className="min-h-screen bg-[#F0F6FC] text-slate-800 flex flex-col relative overflow-x-hidden">
+    <div className="min-h-[100dvh] bg-[#F0F6FC] text-slate-800 flex flex-col relative overflow-x-hidden pb-[max(1rem,env(safe-area-inset-bottom))]">
       
       {/* ==============================================================
            ANIMATED TRAFFIC & HIGHWAY BACKGROUND (MOTORCYCLE & CAR)
@@ -253,30 +253,31 @@ export default function HistoryPage() {
       </div>
 
       {/* ==============================================================
-           NAVBAR
+           NAVBAR (Mobile-Native Safe-Area Support)
            ============================================================== */}
-      <header className="sticky top-0 z-[100] bg-white border-b border-slate-200/80 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center p-1 border border-sky-100 shadow-sm">
+      <header className="sticky top-0 z-[100] bg-white border-b border-slate-200/80 shadow-sm pt-[env(safe-area-inset-top)]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-50 flex items-center justify-center p-1 border border-sky-100 shadow-sm">
               <Image src="/images/logo.png" alt="SmartRoute Logo" width={32} height={32} className="object-contain" />
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-lg text-slate-900 tracking-tight">SmartRoute AI</span>
-              <span className="text-[10px] font-bold bg-gradient-to-r from-sky-600 to-cyan-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
+              <span className="font-bold text-base sm:text-lg text-slate-900 tracking-tight">SmartRoute AI</span>
+              <span className="text-[9px] sm:text-[10px] font-bold bg-gradient-to-r from-sky-600 to-cyan-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider hidden xs:inline">
                 Dashboard
               </span>
             </div>
           </Link>
 
-          <div className="flex items-center gap-3 sm:gap-5">
-            <nav className="flex items-center gap-3 sm:gap-5 text-xs sm:text-sm font-semibold">
-              <Link href="/home" className="text-slate-600 hover:text-sky-600 flex items-center gap-1.5 transition">
-                <Compass className="w-4 h-4" />
-                <span>Rencana Rute</span>
+          <div className="flex items-center gap-2 sm:gap-5">
+            <nav className="flex items-center gap-2.5 sm:gap-5 text-xs sm:text-sm font-semibold">
+              <Link href="/home" className="text-slate-600 hover:text-sky-600 flex items-center gap-1 sm:gap-1.5 transition">
+                <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Rencana Rute</span>
+                <span className="sm:hidden">Rute</span>
               </Link>
-              <Link href="/history" className="text-sky-600 flex items-center gap-1.5 transition">
-                <Clock className="w-4 h-4" />
+              <Link href="/history" className="text-sky-600 flex items-center gap-1 sm:gap-1.5 transition">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>Riwayat</span>
               </Link>
             </nav>

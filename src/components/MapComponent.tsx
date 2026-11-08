@@ -208,5 +208,10 @@ export default function MapComponent({
     }
   }, [routeGeometry, originCoords, midpointCoords, destCoords, pitstop]);
 
-  return <div ref={mapContainerRef} className="w-full h-full min-h-[380px] sm:min-h-[520px] rounded-2xl z-0" />;
+  return (
+    <div
+      ref={mapContainerRef}
+      className="w-full h-full min-h-[300px] sm:min-h-[440px] lg:min-h-[520px] rounded-2xl z-0 touch-pan-x"
+    />
+  );
 }

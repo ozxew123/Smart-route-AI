@@ -25,9 +25,16 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Mobile-Native Experience & Touch Optimization (mobile-native skill) */
+/* Mobile-Native Experience & Touch Optimization (mobile-native & emil-design-eng) */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Rule 4: Prevent iOS Safari auto-zoom on input focus by enforcing 16px min font size */
+@media screen and (max-width: 640px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
 }
 
 button, a, input, select, textarea, [role="button"] {
@@ -39,17 +46,24 @@ button, [role="button"], .no-select {
   -webkit-user-select: none;
 }
 
-/* Emil Design Engineering: Tactile Button Feedback */
-button:active:not(:disabled) {
-  transform: scale(0.98);
-  transition: transform 80ms ease-out;
+/* Emil Design Engineering: Tactile Button Press Feedback */
+button:active:not(:disabled), a:active:not([disabled]), [role="button"]:active {
+  transform: scale(0.97) !important;
+  transition: transform 70ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Sticky hover fix: only enable hover transformations on devices with actual mouse pointer */
+@media (hover: none) or (pointer: coarse) {
+  button:hover, a:hover, [role="button"]:hover {
+    transform: none !important;
+  }
 }
 
 /* Emil Design Engineering: Snappy Popover / Dropdown Scale-In */
 @keyframes dropdownEnter {
   0% {
     opacity: 0;
-    transform: scale(0.95) translateY(-4px);
+    transform: scale(0.96) translateY(-4px);
   }
   100% {
     opacity: 1;
@@ -58,7 +72,7 @@ button:active:not(:disabled) {
 }
 
 .animate-fadeIn {
-  animation: dropdownEnter 160ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: dropdownEnter 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transform-origin: top right;
 }
 

@@ -60,7 +60,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-batik-kawung flex flex-col justify-center items-center p-4 relative">
+    <div className="min-h-[100dvh] bg-batik-kawung flex flex-col justify-center items-center p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] relative">
       {/* Auth Card */}
       <div className="w-full max-w-md bg-white/95 backdrop-blur-xl border border-sky-100 shadow-xl shadow-sky-950/5 rounded-3xl p-8 transition-all">
         {/* Brand Logo & Header */}

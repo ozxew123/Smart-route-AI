@@ -286,29 +286,30 @@ function HomeContent() {
   const riskLevelText = resultData?.risk?.risk_level || resultData?.risk?.level || "Rendah";
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
+    <div className="min-h-[100dvh] bg-[#F8FAFC] flex flex-col font-sans">
       
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-[100] bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 font-extrabold text-lg text-slate-900 tracking-tight">
-            <div className="relative w-8 h-8 rounded-xl bg-sky-50 p-1 border border-sky-100 overflow-hidden shadow-sm flex items-center justify-center">
+      {/* Top Navbar with Safe Area Support */}
+      <header className="sticky top-0 z-[100] bg-white border-b border-slate-200 pt-[env(safe-area-inset-top)]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 font-extrabold text-base sm:text-lg text-slate-900 tracking-tight flex-shrink-0">
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-sky-50 p-1 border border-sky-100 overflow-hidden shadow-sm flex items-center justify-center">
               <Image src="/images/logo.png" alt="SmartRoute Logo" width={28} height={28} className="object-contain" />
             </div>
             <span>SmartRoute AI</span>
-            <span className="text-[10px] font-bold bg-sky-600 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
+            <span className="text-[9px] sm:text-[10px] font-bold bg-sky-600 text-white px-2 py-0.5 rounded-full uppercase tracking-wider hidden xs:inline">
               Navigator
             </span>
           </Link>
 
-          <div className="flex items-center gap-3 sm:gap-5">
-            <nav className="flex items-center gap-3 sm:gap-5 text-xs sm:text-sm font-semibold">
-              <Link href="/home" className="text-sky-600 border-b-2 border-sky-600 pb-1 flex items-center gap-1.5">
-                <Compass className="w-4 h-4" />
-                <span>Rencana Rute</span>
+          <div className="flex items-center gap-2 sm:gap-5">
+            <nav className="flex items-center gap-2.5 sm:gap-5 text-xs sm:text-sm font-semibold">
+              <Link href="/home" className="text-sky-600 border-b-2 border-sky-600 pb-1 flex items-center gap-1 sm:gap-1.5">
+                <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Rencana Rute</span>
+                <span className="sm:hidden">Rute</span>
               </Link>
-              <Link href="/history" className="text-slate-600 hover:text-sky-600 transition-colors flex items-center gap-1.5">
-                <Clock className="w-4 h-4" />
+              <Link href="/history" className="text-slate-600 hover:text-sky-600 transition-colors flex items-center gap-1 sm:gap-1.5">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>Riwayat</span>
               </Link>
             </nav>
@@ -881,8 +882,8 @@ function HomeContent() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="mt-auto bg-white border-t border-slate-200 py-4 text-xs text-slate-500">
+      {/* Footer with Safe Area Support */}
+      <footer className="mt-auto bg-white border-t border-slate-200 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
           <span>&copy; 2026 SmartRoute AI — Asisten Navigasi & Telemetri Cuaca Real-Time.</span>
           <span>Didesain khusus untuk keselamatan pengendara komuter harian.</span>

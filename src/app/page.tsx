@@ -84,10 +84,10 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-hidden">
+    <div className="min-h-[100dvh] bg-slate-50 flex flex-col font-sans overflow-x-hidden pb-[max(1rem,env(safe-area-inset-bottom))]">
       
-      {/* Navbar (Untuk Pengunjung Sebelum Login) */}
-      <header className="sticky top-0 z-[100] bg-white border-b border-slate-200">
+      {/* Navbar with Safe Area Support */}
+      <header className="sticky top-0 z-[100] bg-white border-b border-slate-200 pt-[env(safe-area-inset-top)]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 font-extrabold text-lg text-slate-900 tracking-tight">
             <div className="relative w-8 h-8 rounded-lg overflow-hidden shadow-sm flex-shrink-0">
