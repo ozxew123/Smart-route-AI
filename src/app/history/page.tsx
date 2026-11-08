@@ -101,6 +101,18 @@ export default function HistoryPage() {
   const [selectedDetail, setSelectedDetail] = useState<HistoryItem | null>(null);
 
   useEffect(() => {
+    // Proteksi halaman Riwayat: harus login terlebih dahulu
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data?.authenticated) {
+          router.replace("/login");
+        }
+      })
+      .catch(() => {});
+  }, [router]);
+
+  useEffect(() => {
     fetchHistories();
 
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -30,6 +30,9 @@ export default function LoginPage() {
       const data = await response.json().catch(() => null);
 
       if (response.ok && data?.success) {
+        if (data.user) {
+          localStorage.setItem("smartroute_user_profile", JSON.stringify(data.user));
+        }
         setSuccessMsg("Berhasil masuk! Mengalihkan ke dashboard...");
         setTimeout(() => {
           router.push("/home");
@@ -37,6 +40,7 @@ export default function LoginPage() {
       } else {
         // Fallback for direct browser testing if backend isn't yet session-linked
         if (email && password) {
+          localStorage.setItem("smartroute_user_profile", JSON.stringify({ nama: email.split("@")[0], email }));
           setSuccessMsg("Selamat datang kembali! Mengalihkan...");
           setTimeout(() => {
             router.push("/home");

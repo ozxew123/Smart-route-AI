@@ -10,7 +10,6 @@ import {
   Clock,
   ShieldCheck,
   ChevronDown,
-  Settings,
   Bike,
   Sparkles
 } from "lucide-react";
@@ -20,15 +19,15 @@ export interface UserProfileData {
   email: string;
   phone?: string;
   vehicle: "motor" | "mobil";
-  default_origin: string;
-  avoid_heavy_rain: boolean;
-  raincoat_alert: boolean;
-  speed_caution: boolean;
+  default_origin?: string;
+  avoid_heavy_rain?: boolean;
+  raincoat_alert?: boolean;
+  speed_caution?: boolean;
 }
 
 export const defaultProfile: UserProfileData = {
-  nama: "Hikmal Ramadhan",
-  email: "hikmal.commuter@gmail.com",
+  nama: "Pengendara Komuter",
+  email: "komuter@smartroute.id",
   phone: "0812-9876-5432",
   vehicle: "motor",
   default_origin: "Margonda, Depok",
@@ -39,22 +38,29 @@ export const defaultProfile: UserProfileData = {
 
 export default function UserNavDropdown() {
   const router = useRouter();
-  const [profile, setProfile] = useState<UserProfileData>(defaultProfile);
+  const [user, setUser] = useState<{ id: number; nama: string; email: string } | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Muat data profil dari localStorage
-    try {
-      const stored = localStorage.getItem("smartroute_user_profile");
-      if (stored) {
-        setProfile({ ...defaultProfile, ...JSON.parse(stored) });
-      } else {
-        localStorage.setItem("smartroute_user_profile", JSON.stringify(defaultProfile));
-      }
-    } catch {
-      // ignore
-    }
+    // Ambil data user autentikasi dari sesi backend
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.authenticated && data?.user) {
+          setUser(data.user);
+        } else {
+          // Cek fallback localStorage jika ada
+          const stored = localStorage.getItem("smartroute_user_profile");
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              if (parsed.email) setUser(parsed);
+            } catch {}
+          }
+        }
+      })
+      .catch(() => {});
 
     // Klik di luar dropdown untuk menutup
     const handleClickOutside = (e: MouseEvent) => {
@@ -68,17 +74,21 @@ export default function UserNavDropdown() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/logout", { method: "POST" });
-    } catch {
-      // offline fallback
-    }
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {}
+    localStorage.removeItem("smartroute_user_profile");
+    setUser(null);
     setIsOpen(false);
-    router.push("/login");
+    router.replace("/");
   };
 
+  if (!user) {
+    return null;
+  }
+
   // Dapatkan inisial nama
-  const initials = profile.nama
-    ? profile.nama
+  const initials = user.nama
+    ? user.nama
         .split(" ")
         .map((n) => n[0])
         .slice(0, 2)
@@ -98,8 +108,8 @@ export default function UserNavDropdown() {
           {initials}
         </div>
         <div className="text-left hidden sm:block">
-          <div className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[110px]">
-            {profile.nama}
+          <div className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[120px]">
+            {user.nama}
           </div>
           <div className="text-[10px] text-slate-400 font-medium leading-none flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -113,7 +123,7 @@ export default function UserNavDropdown() {
         />
       </button>
 
-      {/* Dropdown Card (Solid White Background, Never Transparent) */}
+      {/* Dropdown Card */}
       {isOpen && (
         <div
           style={{ backgroundColor: "#ffffff" }}
@@ -130,40 +140,21 @@ export default function UserNavDropdown() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-extrabold text-sm text-slate-900 truncate">
-                  {profile.nama}
+                  {user.nama}
                 </div>
-                <div className="text-xs text-slate-400 truncate">{profile.email}</div>
+                <div className="text-xs text-slate-400 truncate">{user.email}</div>
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[11px]">
               <span className="inline-flex items-center gap-1 text-sky-700 bg-sky-50 font-bold px-2 py-0.5 rounded-full border border-sky-200">
-                <Sparkles className="w-3 h-3" /> PRO Komuter
-              </span>
-              <span className="text-slate-500 font-medium">
-                Moda: <strong className="text-slate-800 capitalize">{profile.vehicle}</strong>
+                <Sparkles className="w-3 h-3" /> Akun Terverifikasi
               </span>
             </div>
           </div>
 
           {/* Nav Items */}
           <div className="px-2 py-2 space-y-1 text-xs font-semibold text-slate-700">
-            <Link
-              href="/profile"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-sky-50 hover:text-sky-700 transition"
-            >
-              <div className="w-7 h-7 rounded-lg bg-sky-100/60 text-sky-600 flex items-center justify-center flex-shrink-0">
-                <User className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="font-bold">Profil & Pengaturan AI</div>
-                <div className="text-[10px] text-slate-400 font-normal">
-                  Atur asal default & preferensi cuaca
-                </div>
-              </div>
-            </Link>
-
             <Link
               href="/home"
               onClick={() => setIsOpen(false)}
@@ -173,9 +164,9 @@ export default function UserNavDropdown() {
                 <Compass className="w-4 h-4" />
               </div>
               <div>
-                <div className="font-bold">Asisten Rute Pintar</div>
+                <div className="font-bold">Asisten Rute & Navigasi</div>
                 <div className="text-[10px] text-slate-400 font-normal">
-                  Rencanakan rute baru dengan cuaca 3 titik
+                  Peta navigasi rute & telemetri cuaca
                 </div>
               </div>
             </Link>
@@ -189,9 +180,9 @@ export default function UserNavDropdown() {
                 <Clock className="w-4 h-4" />
               </div>
               <div>
-                <div className="font-bold">Dashboard Riwayat</div>
+                <div className="font-bold">Riwayat Perjalanan</div>
                 <div className="text-[10px] text-slate-400 font-normal">
-                  Lihat rute komuter yang pernah dianalisis
+                  Daftar rute komuter yang pernah dicari
                 </div>
               </div>
             </Link>
@@ -217,4 +208,3 @@ export default function UserNavDropdown() {
     </div>
   );
 }
-

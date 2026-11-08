@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Sparkles,
   ArrowRight,
@@ -21,7 +22,6 @@ import {
   Menu,
   X
 } from "lucide-react";
-import UserNavDropdown from "@/components/UserNavDropdown";
 
 const demoData = [
   {
@@ -57,10 +57,23 @@ const demoData = [
 ];
 
 export default function LandingPage() {
+  const router = useRouter();
   const [activeScenario, setActiveScenario] = useState(0);
   const [isMicActive, setIsMicActive] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const currentDemo = demoData[activeScenario];
+
+  // Jika pengguna sudah login, langsung alihkan ke Navigator (/home)
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.authenticated) {
+          router.replace("/home");
+        }
+      })
+      .catch(() => {});
+  }, [router]);
 
   const handleVoiceSimulation = () => {
     setIsMicActive(true);
@@ -73,7 +86,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-hidden">
       
-      {/* Navbar */}
+      {/* Navbar (Untuk Pengunjung Sebelum Login) */}
       <header className="sticky top-0 z-[100] bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 font-extrabold text-lg text-slate-900 tracking-tight">
@@ -93,16 +106,21 @@ export default function LandingPage() {
             <a href="#simulasi" className="hover:text-sky-600 transition-colors">Simulasi Rute</a>
           </nav>
 
-          {/* Desktop CTA */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Desktop Auth CTA */}
+          <div className="hidden sm:flex items-center gap-2.5">
             <Link
-              href="/home"
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 px-4 py-2 rounded-full shadow-md shadow-sky-600/20 transition-all hover:-translate-y-0.5"
+              href="/login"
+              className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-sky-600 px-3.5 py-2 transition"
             >
-              <span>Rencana Rute</span>
+              Masuk
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 px-4 py-2 rounded-full shadow-md shadow-sky-600/20 transition-all hover:-translate-y-0.5"
+            >
+              <span>Daftar Akun</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <UserNavDropdown />
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -132,20 +150,13 @@ export default function LandingPage() {
             >
               Cara Kerja
             </a>
-            <Link
-              href="/history"
+            <a
+              href="#simulasi"
               onClick={() => setMobileMenuOpen(false)}
               className="block py-2 text-sm font-semibold text-slate-700 hover:text-sky-600"
             >
-              Dashboard Riwayat
-            </Link>
-            <Link
-              href="/profile"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-sm font-semibold text-slate-700 hover:text-sky-600"
-            >
-              Profil & Preferensi AI
-            </Link>
+              Simulasi Rute
+            </a>
             <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
               <Link
                 href="/login"
@@ -155,11 +166,11 @@ export default function LandingPage() {
                 Masuk ke Akun
               </Link>
               <Link
-                href="/home"
+                href="/register"
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full text-center py-2.5 rounded-xl bg-sky-600 text-white text-sm font-semibold shadow-md shadow-sky-600/20"
               >
-                Mulai Rencana Rute
+                Daftar Akun Pengendara
               </Link>
             </div>
           </div>
@@ -192,11 +203,11 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-xs sm:max-w-none mx-auto mb-10 sm:mb-12">
             <Link
-              href="/home"
+              href="/register"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-3.5 rounded-full shadow-lg shadow-sky-600/25 transition-all text-sm sm:text-base"
             >
               <Route className="w-5 h-5" />
-              <span>Mulai Rencana Rute — Gratis</span>
+              <span>Mulai Rencana Rute — Daftar Gratis</span>
             </Link>
             <Link
               href="/login"

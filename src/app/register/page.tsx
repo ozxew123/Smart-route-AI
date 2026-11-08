@@ -31,6 +31,9 @@ export default function RegisterPage() {
       const data = await response.json().catch(() => null);
 
       if (response.ok && data?.success) {
+        if (data.user) {
+          localStorage.setItem("smartroute_user_profile", JSON.stringify(data.user));
+        }
         setSuccessMsg("Akun berhasil dibuat! Mengalihkan ke login...");
         setTimeout(() => {
           router.push("/login");

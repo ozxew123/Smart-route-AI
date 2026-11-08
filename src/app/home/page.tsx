@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Mic,
   Search,
@@ -50,12 +50,25 @@ interface WeatherNode {
 }
 
 function HomeContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [vehicle, setVehicle] = useState<"motor" | "mobil">("motor");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{ type: string; text: string } | null>(null);
+
+  // Proteksi halaman Navigator: harus login terlebih dahulu
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data?.authenticated) {
+          router.replace("/login");
+        }
+      })
+      .catch(() => {});
+  }, [router]);
 
   // FR-06: State Modul Klarifikasi Asisten
   const [clarification, setClarification] = useState<{
