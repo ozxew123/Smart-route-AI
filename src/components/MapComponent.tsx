@@ -16,13 +16,21 @@ interface MapProps {
   originCoords?: { lat: number; lon: number; name?: string; weather?: WeatherPoint };
   midpointCoords?: { lat: number; lon: number; name?: string; weather?: WeatherPoint };
   destCoords?: { lat: number; lon: number; name?: string; weather?: WeatherPoint };
+  pitstop?: {
+    needed: boolean;
+    shelter_name: string;
+    distance_before_km: number;
+    advice: string;
+    coords: { lat: number; lon: number } | null;
+  } | null;
 }
 
 export default function MapComponent({
   routeGeometry,
   originCoords,
   midpointCoords,
-  destCoords
+  destCoords,
+  pitstop,
 }: MapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -162,7 +170,43 @@ export default function MapComponent({
         `)
         .addTo(layerGroup);
     }
-  }, [routeGeometry, originCoords, midpointCoords, destCoords]);
+
+    // 5. Tambahkan Pin Khusus: Pitstop Jas Hujan Predictor (Ungu)
+    if (pitstop && pitstop.needed && pitstop.coords) {
+      L.marker([pitstop.coords.lat, pitstop.coords.lon], {
+        icon: L.divIcon({
+          className: "custom-div-icon",
+          html: `
+            <div style="
+              background-color: #8B5CF6;
+              width: 34px;
+              height: 34px;
+              border-radius: 50%;
+              border: 3px solid white;
+              box-shadow: 0 4px 14px rgba(139, 92, 246, 0.6);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 16px;
+              cursor: pointer;
+            ">
+              🧥
+            </div>
+          `,
+          iconSize: [34, 34],
+          iconAnchor: [17, 17],
+        }),
+      })
+        .bindPopup(`
+          <div style="min-width: 180px; font-family: sans-serif;">
+            <span style="background: #F5F3FF; color: #7C3AED; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px;">🧥 Rekomendasi Pitstop Jas Hujan</span>
+            <div style="font-weight: bold; margin-top: 5px; font-size: 13px; color: #1E1B4B;">${pitstop.shelter_name}</div>
+            <div style="font-size: 11px; color: #475569; margin-top: 4px; line-height: 1.4;">${pitstop.advice}</div>
+          </div>
+        `)
+        .addTo(layerGroup);
+    }
+  }, [routeGeometry, originCoords, midpointCoords, destCoords, pitstop]);
 
   return <div ref={mapContainerRef} className="w-full h-full min-h-[380px] sm:min-h-[520px] rounded-2xl z-0" />;
 }

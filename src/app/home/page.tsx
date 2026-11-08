@@ -54,6 +54,7 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [vehicle, setVehicle] = useState<"motor" | "mobil">("motor");
+  const [plate, setPlate] = useState<"Ganjil" | "Genap">("Genap");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{ type: string; text: string } | null>(null);
@@ -108,6 +109,27 @@ function HomeContent() {
       origin: string;
       destination: string;
       vehicle: string;
+      plate?: string;
+    };
+    pitstop?: {
+      needed: boolean;
+      shelter_name: string;
+      distance_before_km: number;
+      reason: string;
+      advice: string;
+      coords: { lat: number; lon: number } | null;
+    };
+    zero_tilang?: {
+      status: "aman" | "waspada" | "perhatian";
+      rule_type: string;
+      title: string;
+      message: string;
+      restricted_zones: string[];
+      safe_alternative_note: string;
+      today_date_number: number;
+      today_rule: "Ganjil" | "Genap";
+      user_plate: "Ganjil" | "Genap";
+      is_rush_hour: boolean;
     };
   } | null>(null);
 
@@ -169,7 +191,7 @@ function HomeContent() {
     }
   };
 
-  const handleExecuteRoute = async (searchQuery: string, searchVehicle: "motor" | "mobil") => {
+  const handleExecuteRoute = async (searchQuery: string, searchVehicle: "motor" | "mobil", searchPlate: "Ganjil" | "Genap" = plate) => {
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);
@@ -180,7 +202,7 @@ function HomeContent() {
       const resp = await fetch("/api/process-route", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: searchQuery, vehicle: searchVehicle }),
+        body: JSON.stringify({ query: searchQuery, vehicle: searchVehicle, plate: searchPlate }),
       });
 
       const data = await resp.json();
@@ -216,7 +238,7 @@ function HomeContent() {
       setResultData(null);
       setAlertMessage({
         type: "danger",
-        text: "Terjadi gangguan koneksi ke server Flask backend. Pastikan server Flask aktif di port 5000.",
+        text: "Terjadi gangguan koneksi saat memproses rute perjalanan. Silakan coba sesaat lagi.",
       });
     } finally {
       setIsLoading(false);
@@ -225,7 +247,7 @@ function HomeContent() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleExecuteRoute(query, vehicle);
+    handleExecuteRoute(query, vehicle, plate);
   };
 
   // Submit klarifikasi tambahan dari pengguna (FR-06 & AC 2)
@@ -245,14 +267,14 @@ function HomeContent() {
     setQuery(synthesizedQuery);
     setClarification(null);
     setClarificationInput("");
-    handleExecuteRoute(synthesizedQuery, vehicle);
+    handleExecuteRoute(synthesizedQuery, vehicle, plate);
   };
 
   // Preset prompts
-  const applyPreset = (presetText: string, presetVehicle: "motor" | "mobil" = "motor") => {
+  const applyPreset = (presetText: string, presetVehicle: "motor" | "mobil" = "motor", presetPlate: "Ganjil" | "Genap" = plate) => {
     setQuery(presetText);
     setVehicle(presetVehicle);
-    handleExecuteRoute(presetText, presetVehicle);
+    handleExecuteRoute(presetText, presetVehicle, presetPlate);
   };
 
   // Deteksi ikon cuaca relevan untuk Kartu AI Advisor (FR-05)
@@ -410,6 +432,43 @@ function HomeContent() {
                     >
                       <Car className="w-4 h-4" />
                       <span>Mobil Pribadi</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Zero-Tilang: Opsi Plat Nomor (Ganjil-Genap) */}
+                <div className="pt-1">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Zero-Tilang (Plat Nomor):</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      Aturan Ganjil-Genap Jakarta
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPlate("Ganjil")}
+                      className={`py-2 px-2.5 rounded-xl text-xs font-bold border transition-all ${
+                        plate === "Ganjil"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-300 shadow-sm ring-1 ring-emerald-300"
+                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      Plat Ganjil (1, 3, 5, 7, 9)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPlate("Genap")}
+                      className={`py-2 px-2.5 rounded-xl text-xs font-bold border transition-all ${
+                        plate === "Genap"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-300 shadow-sm ring-1 ring-emerald-300"
+                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      Plat Genap (0, 2, 4, 6, 8)
                     </button>
                   </div>
                 </div>
@@ -583,6 +642,117 @@ function HomeContent() {
             )}
 
             {/* ========================================================
+                 FITUR 1: 🧥 JAS HUJAN PITSTOP PREDICTOR
+                 ======================================================== */}
+            {resultData?.pitstop?.needed && (
+              <div className="bg-gradient-to-br from-violet-50 to-purple-50/60 border border-violet-200 rounded-3xl p-5 sm:p-6 shadow-sm animate-fadeIn">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-2xl bg-violet-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                      🧥
+                    </div>
+                    <div>
+                      <h6 className="font-extrabold text-slate-900 text-sm mb-0">
+                        Jas Hujan Pitstop Predictor
+                      </h6>
+                      <span className="text-[10px] text-violet-700 font-semibold">
+                        Fitur Proteksi Pemotor Sebelum Kehujanan
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-300 px-2.5 py-1 rounded-full uppercase">
+                    Pitstop Aktif
+                  </span>
+                </div>
+
+                <div className="bg-white/90 rounded-2xl p-3.5 border border-violet-100 mb-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500">Rekomendasi Titik Singgah:</span>
+                    <strong className="text-violet-950 text-right">{resultData.pitstop.shelter_name}</strong>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500">Jarak Sebelum Titik Hujan:</span>
+                    <span className="font-bold text-violet-700">± {resultData.pitstop.distance_before_km} km</span>
+                  </div>
+                  <div className="text-[11px] text-slate-600 pt-1 border-t border-slate-100 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-violet-600 flex-shrink-0" />
+                    <span>Pin bertanda <strong>🧥 ungu</strong> telah ditandai pada peta navigasi.</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-700 leading-relaxed bg-violet-100/60 p-3 rounded-xl border border-violet-200/60">
+                  {resultData.pitstop.advice}
+                </p>
+              </div>
+            )}
+
+            {/* ========================================================
+                 FITUR 2: 🛵 ZERO-TILANG & JALUR AMAN MOTOR / GANJIL-GENAP
+                 ======================================================== */}
+            {resultData?.zero_tilang && (
+              <div
+                className={`border rounded-3xl p-5 sm:p-6 shadow-sm animate-fadeIn ${
+                  resultData.zero_tilang.status === "waspada"
+                    ? "bg-amber-50/80 border-amber-200"
+                    : "bg-emerald-50/70 border-emerald-200"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={`w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-white shadow-sm ${
+                        resultData.zero_tilang.status === "waspada" ? "bg-amber-500" : "bg-emerald-600"
+                      }`}
+                    >
+                      <ShieldCheck className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h6 className="font-extrabold text-slate-900 text-sm mb-0">
+                        Zero-Tilang Guard
+                      </h6>
+                      <span
+                        className={`text-[10px] font-semibold ${
+                          resultData.zero_tilang.status === "waspada" ? "text-amber-700" : "text-emerald-700"
+                        }`}
+                      >
+                        {resultData.zero_tilang.rule_type === "motor_guard"
+                          ? "Filter Jalur Bebas Tilang & Non-JLNT"
+                          : "Kepatuhan Ganjil-Genap Protokol"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                      resultData.zero_tilang.status === "waspada"
+                        ? "bg-amber-100 text-amber-800 border border-amber-300"
+                        : "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                    }`}
+                  >
+                    {resultData.zero_tilang.status.toUpperCase()}
+                  </span>
+                </div>
+
+                <div className="text-xs font-bold text-slate-900 mb-1.5">
+                  {resultData.zero_tilang.title}
+                </div>
+                <p className="text-xs text-slate-700 leading-relaxed mb-3">
+                  {resultData.zero_tilang.message}
+                </p>
+
+                {resultData.zero_tilang.safe_alternative_note && (
+                  <div className="bg-white/90 rounded-2xl p-3 border border-slate-200 text-xs text-slate-800 flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-slate-900">Rekomendasi Jalur Aman: </span>
+                      <span>{resultData.zero_tilang.safe_alternative_note}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ========================================================
                  FR-03: INFORMASI DETAIL RUTE (OSRM ROUTING ENGINE)
                  Asal, Tujuan, Kendaraan, Jarak, dan Estimasi Waktu
                  ======================================================== */}
@@ -734,6 +904,7 @@ function HomeContent() {
                       }
                     : undefined
                 }
+                pitstop={resultData?.pitstop}
               />
             </div>
 

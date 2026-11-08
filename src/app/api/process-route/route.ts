@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { extractEntitiesWithGroq, generateSafetyAdviceWithGroq } from "@/lib/groq";
 import { geocode, getRoute } from "@/lib/map";
 import { sampleThreePoints, analyzeWeatherRisk, buildSafetyAdvice } from "@/lib/weather";
+import { calculatePitstop, evaluateZeroTilang } from "@/lib/safety-rules";
 import { supabase } from "@/lib/supabase";
 import { getSessionUser } from "@/lib/auth";
 
@@ -10,6 +11,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const userQuery = (body.query || "").trim();
     const overrideVehicle = body.vehicle;
+    const userPlate = body.plate === "Ganjil" ? "Ganjil" : "Genap";
 
     if (!userQuery) {
       return NextResponse.json(
@@ -93,6 +95,22 @@ export async function POST(req: NextRequest) {
       baseAdvice
     );
 
+    // 5.1 Pitstop Jas Hujan Predictor & Zero-Tilang Guard
+    const pitstopRecommendation = calculatePitstop(
+      vehicle,
+      routeData.coordinates,
+      weather3Points,
+      originName,
+      destName
+    );
+
+    const zeroTilangAnalysis = evaluateZeroTilang(
+      vehicle,
+      originName,
+      destName,
+      userPlate
+    );
+
     // 6. Simpan ke Riwayat di Supabase
     let historyId: number | null = null;
     const session = getSessionUser();
@@ -152,11 +170,14 @@ export async function POST(req: NextRequest) {
           origin: originName,
           destination: destName,
           vehicle,
+          plate: userPlate,
         },
         route: routeData,
         weather: weather3Points,
         risk: riskAnalysis,
         advice: finalAdvice,
+        pitstop: pitstopRecommendation,
+        zero_tilang: zeroTilangAnalysis,
         history_id: historyId,
       },
       { status: 200 }
