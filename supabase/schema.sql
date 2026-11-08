@@ -77,3 +77,4 @@ LIMIT 30;
 -- C. Menghapus 1 Riwayat (DELETE)
 DELETE FROM public.search_histories
 WHERE id = 8 AND user_id = 3;
+
