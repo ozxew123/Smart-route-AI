@@ -192,50 +192,35 @@ export function evaluateZeroTilang(
     };
   }
 
-  // 2. Kasus Mobil: Aturan Ganjil-Genap Jakarta
-  const isPlateMatch = userPlate === todayRule;
+  // 2. Kasus Mobil: Info Aturan Ganjil-Genap Jakarta Otomatis Hari Ini
+  const oppositeRule: "Ganjil" | "Genap" = todayRule === "Genap" ? "Ganjil" : "Genap";
 
   if (isWeekend) {
     return {
       status: "aman",
       rule_type: "ganjil_genap",
       title: "Ganjil-Genap: Bebas Aturan (Akhir Pekan)",
-      message: "Hari Sabtu & Minggu tidak diberlakukan aturan Ganjil-Genap di seluruh ruas jalan DKI Jakarta.",
+      message: "Hari Sabtu & Minggu aturan Ganjil-Genap TIDAK BERLAKU di seluruh ruas jalan DKI Jakarta. Semua kendaraan mobil bebas melintas.",
       restricted_zones: [],
-      safe_alternative_note: "Bebas melintas di seluruh jalan protokol.",
+      safe_alternative_note: "Bebas melintas di seluruh jalan protokol tanpa batasan plat nomor.",
       today_date_number: dateNumber,
       today_rule: todayRule,
-      user_plate: userPlate,
+      user_plate: todayRule,
       is_rush_hour: false,
     };
   }
 
   if (isRushHour) {
-    if (!isPlateMatch) {
-      return {
-        status: "waspada",
-        rule_type: "ganjil_genap",
-        title: `Peringatan Ganjil-Genap: Plat Anda (${userPlate}) Dilarang Melintas`,
-        message: `Hari ini tanggal ${dateNumber} (${todayRule}). Saat ini jam sibuk ganjil-genap aktif. Plat mobil ${userPlate} dilarang melintasi 25 koridor protokol (Sudirman, Thamrin, Gatot Subroto, Rasuna Said, dll).`,
-        restricted_zones: ["Jl. Sudirman - Thamrin", "Jl. Gatot Subroto", "Jl. HR Rasuna Said", "Jl. MT Haryono"],
-        safe_alternative_note: "Gunakan jalur jalan tol lingkar dalam/luar atau jalan alternatif non-protokol.",
-        today_date_number: dateNumber,
-        today_rule: todayRule,
-        user_plate: userPlate,
-        is_rush_hour: true,
-      };
-    }
-
     return {
-      status: "aman",
+      status: "waspada",
       rule_type: "ganjil_genap",
-      title: `Ganjil-Genap: Plat Anda (${userPlate}) Sesuai`,
-      message: `Hari ini tanggal ${dateNumber} (${todayRule}). Plat mobil Anda cocok untuk melintasi seluruh jalan protokol Jakarta pada jam sibuk ini.`,
-      restricted_zones: [],
-      safe_alternative_note: "Patuhi batas kecepatan dan selalu gunakan sabuk pengaman.",
+      title: `Ganjil-Genap Hari Ini: Khusus Plat ${todayRule.toUpperCase()} (Jam Sibuk Aktif)`,
+      message: `Hari ini tanggal ${dateNumber} (${todayRule}). Sesi jam sibuk ganjil-genap sedang aktif (06:00-10:00 & 16:00-21:00 WIB). Hanya mobil ber-plat ${todayRule} yang boleh melintas di 25 jalan protokol. Mobil ber-plat ${oppositeRule} dilarang melintas.`,
+      restricted_zones: ["Jl. Sudirman - Thamrin", "Jl. Gatot Subroto", "Jl. HR Rasuna Said", "Jl. MT Haryono"],
+      safe_alternative_note: `Jika mobil Anda ber-plat ${oppositeRule}, gunakan jalur jalan tol lingkar dalam/luar atau jalan alternatif non-protokol untuk menghindari tilang kamera ETLE.`,
       today_date_number: dateNumber,
       today_rule: todayRule,
-      user_plate: userPlate,
+      user_plate: todayRule,
       is_rush_hour: true,
     };
   }
@@ -244,13 +229,13 @@ export function evaluateZeroTilang(
   return {
     status: "aman",
     rule_type: "ganjil_genap",
-    title: "Ganjil-Genap: Di Luar Jam Pembatasan",
-    message: "Pembatasan Ganjil-Genap hanya berlaku jam 06:00-10:00 & 16:00-21:00 WIB. Saat ini Anda bebas melintas.",
+    title: `Ganjil-Genap Hari Ini: Tanggal ${dateNumber} (Jadwal Plat ${todayRule.toUpperCase()})`,
+    message: `Hari ini tanggal ${dateNumber} (${todayRule}). Saat ini berada di luar jam pembatasan ganjil-genap, sehingga semua plat mobil bebas melintas di jalan protokol hingga jam pembatasan berikutnya (06:00-10:00 atau 16:00-21:00 WIB).`,
     restricted_zones: [],
-    safe_alternative_note: "Perhatikan jam saat perjalanan pulang agar tidak terkena tilang jam sore.",
+    safe_alternative_note: `Perhatikan waktu kepulangan Anda: jika melintas pada jam sibuk sore (16:00-21:00 WIB), hanya mobil plat ${todayRule} yang diizinkan melintas di jalur protokol.`,
     today_date_number: dateNumber,
     today_rule: todayRule,
-    user_plate: userPlate,
+    user_plate: todayRule,
     is_rush_hour: false,
   };
 }

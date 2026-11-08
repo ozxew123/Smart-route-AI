@@ -54,7 +54,6 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [vehicle, setVehicle] = useState<"motor" | "mobil">("motor");
-  const [plate, setPlate] = useState<"Ganjil" | "Genap">("Genap");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{ type: string; text: string } | null>(null);
@@ -191,7 +190,7 @@ function HomeContent() {
     }
   };
 
-  const handleExecuteRoute = async (searchQuery: string, searchVehicle: "motor" | "mobil", searchPlate: "Ganjil" | "Genap" = plate) => {
+  const handleExecuteRoute = async (searchQuery: string, searchVehicle: "motor" | "mobil") => {
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);
@@ -202,7 +201,7 @@ function HomeContent() {
       const resp = await fetch("/api/process-route", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: searchQuery, vehicle: searchVehicle, plate: searchPlate }),
+        body: JSON.stringify({ query: searchQuery, vehicle: searchVehicle }),
       });
 
       const data = await resp.json();
@@ -247,7 +246,7 @@ function HomeContent() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleExecuteRoute(query, vehicle, plate);
+    handleExecuteRoute(query, vehicle);
   };
 
   // Submit klarifikasi tambahan dari pengguna (FR-06 & AC 2)
@@ -267,14 +266,14 @@ function HomeContent() {
     setQuery(synthesizedQuery);
     setClarification(null);
     setClarificationInput("");
-    handleExecuteRoute(synthesizedQuery, vehicle, plate);
+    handleExecuteRoute(synthesizedQuery, vehicle);
   };
 
   // Preset prompts
-  const applyPreset = (presetText: string, presetVehicle: "motor" | "mobil" = "motor", presetPlate: "Ganjil" | "Genap" = plate) => {
+  const applyPreset = (presetText: string, presetVehicle: "motor" | "mobil" = "motor") => {
     setQuery(presetText);
     setVehicle(presetVehicle);
-    handleExecuteRoute(presetText, presetVehicle, presetPlate);
+    handleExecuteRoute(presetText, presetVehicle);
   };
 
   // Deteksi ikon cuaca relevan untuk Kartu AI Advisor (FR-05)
@@ -435,54 +434,6 @@ function HomeContent() {
                     </button>
                   </div>
                 </div>
-
-                {/* Zero-Tilang: Opsi Khusus Mobil (Ganjil-Genap Jakarta) */}
-                {vehicle === "mobil" ? (
-                  <div className="pt-1 animate-fadeIn">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                        <span>Filter Ganjil-Genap (Plat Mobil):</span>
-                      </label>
-                      <span className="text-[10px] text-slate-400 font-medium">
-                        Aturan Protokol DKI Jakarta
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setPlate("Ganjil")}
-                        className={`py-2 px-2.5 rounded-xl text-xs font-bold border transition-all ${
-                          plate === "Ganjil"
-                            ? "bg-amber-50 text-amber-800 border-amber-300 shadow-sm ring-1 ring-amber-300"
-                            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                        }`}
-                      >
-                        Plat Ganjil (1, 3, 5, 7, 9)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPlate("Genap")}
-                        className={`py-2 px-2.5 rounded-xl text-xs font-bold border transition-all ${
-                          plate === "Genap"
-                            ? "bg-amber-50 text-amber-800 border-amber-300 shadow-sm ring-1 ring-amber-300"
-                            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                        }`}
-                      >
-                        Plat Genap (0, 2, 4, 6, 8)
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="pt-1">
-                    <div className="bg-sky-50/70 border border-sky-100 rounded-xl px-3 py-2 flex items-center gap-2 text-[11px] text-sky-800">
-                      <ShieldCheck className="w-4 h-4 text-sky-600 flex-shrink-0" />
-                      <span>
-                        <strong>Motor:</strong> Bebas Ganjil-Genap. Sistem otomatis memproteksi rute dari <strong>JLNT Casablanca, Antasari, dan Flyover Terlarang</strong>.
-                      </span>
-                    </div>
-                  </div>
-                )}
 
                 {/* Submit Button */}
                 <button
