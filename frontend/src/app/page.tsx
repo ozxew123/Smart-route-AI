@@ -368,7 +368,7 @@ export default function LandingPage() {
               </div>
               <h3 className="font-bold text-base text-slate-900 mb-2">Input Suara & NLP Pintar</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Tulis atau ucapkan kalimat santai sehari-hari. Gemini AI mengekstrak lokasi asal, tujuan, moda kendaraan, dan preferensi rute.
+                Tulis atau ucapkan kalimat santai sehari-hari. Groq AI mengekstrak lokasi asal, tujuan, moda kendaraan, dan preferensi rute secepat kilat.
               </p>
             </div>
 

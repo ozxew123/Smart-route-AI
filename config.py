@@ -11,9 +11,14 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 class Config:
     """Konfigurasi aplikasi SmartRoute AI"""
     SECRET_KEY = os.getenv('SECRET_KEY', 'default-dev-secret-key-12345')
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+    GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+    GROQ_MODEL = os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')
     OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY', '')
     
+    # Supabase Cloud Database Configuration
+    SUPABASE_URL = os.getenv('SUPABASE_URL', '')
+    SUPABASE_KEY = os.getenv('SUPABASE_KEY', '')
+
     # Path default SQLite database
     DATABASE_PATH = os.path.join(BASE_DIR, os.getenv('DATABASE_PATH', 'database/smartroute.db'))
     

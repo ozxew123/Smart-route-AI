@@ -2,32 +2,34 @@ import json
 import re
 from config import Config
 
-class GeminiService:
-    """Service untuk Natural Language Processing menggunakan Gemini API (Class Diagram: Gemini_Service)"""
+class GroqService:
+    """Service untuk Natural Language Processing menggunakan Groq AI LPU (Ultra-Fast Inference)"""
 
     def __init__(self):
-        self.api_key = Config.GEMINI_API_KEY
+        self.api_key = Config.GROQ_API_KEY
+        self.model = Config.GROQ_MODEL or "llama-3.3-70b-versatile"
         self.client = None
-        if self.api_key and self.api_key != 'your_gemini_api_key_here':
+
+        if self.api_key and not self.api_key.startswith('your_'):
             try:
-                from google import genai
-                self.client = genai.Client(api_key=self.api_key)
+                from groq import Groq
+                self.client = Groq(api_key=self.api_key)
             except Exception as e:
-                print(f"[GeminiService] Warning: Gagal menginisialisasi Google GenAI client: {e}")
+                print(f"[GroqService] Warning: Gagal menginisialisasi Groq client: {e}")
 
     def extract_entities(self, user_query: str) -> dict:
         """
         Mengekstrak lokasi asal (origin), tujuan (destination), jenis kendaraan (vehicle),
-        dan preferensi perjalanan dari bahasa alami pengguna.
+        dan preferensi perjalanan dari bahasa alami pengguna menggunakan Groq LPU.
         """
         if not user_query:
             return {"complete": False, "message": "Pesan kosong."}
 
-        # Jika API Gemini tersedia
+        # Jika API Groq tersedia
         if self.client:
             prompt = f"""
 Ekstraksi informasi rute perjalanan dari teks pengguna berikut.
-Format keluaran HARUS berupa JSON valid murni tanpa markdown/backticks:
+Format keluaran HARUS berupa JSON murni dengan format persis:
 {{
     "origin": string atau null jika tidak disebutkan,
     "destination": string atau null jika tidak disebutkan,
@@ -38,20 +40,28 @@ Format keluaran HARUS berupa JSON valid murni tanpa markdown/backticks:
 
 Aturan Ekstraksi Lokasi:
 - "origin" dan "destination" HANYA berisi nama tempat/gedung/stasiun/taman murni.
-- BERSIHKAN dan JANGAN sertakan kata sambung/pengantar seperti 'mau', 'ke', 'dari', 'hendak', 'arah', 'titik awal', 'titik keberangkatan'.
+- BERSIHKAN dan JANGAN sertakan kata sambung/pengantar seperti 'mau', 'ke', 'dari', 'hendak', 'arah', 'titik awal', 'titik keberangkatan', 'deket rumah'.
 - Contoh: "titik awal dari stasiun kalibata mau ke ragunan zoo" -> origin: "stasiun kalibata", destination: "ragunan zoo".
 
 Teks Pengguna: "{user_query}"
 """
             try:
-                response = self.client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=prompt
+                chat_completion = self.client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "Anda adalah asisten AI ekstraksi rute perjalanan dan navigasi komuter. Selalu jawab dalam format JSON murni."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    model=self.model,
+                    temperature=0.1,
+                    response_format={"type": "json_object"}
                 )
-                text = response.text.strip()
-                # Bersihkan backtick jika ada
-                text = re.sub(r'^```(json)?', '', text, flags=re.MULTILINE)
-                text = re.sub(r'```$', '', text, flags=re.MULTILINE).strip()
+                text = chat_completion.choices[0].message.content.strip()
                 data = json.loads(text)
 
                 if data.get('origin'):
@@ -61,10 +71,10 @@ Teks Pengguna: "{user_query}"
                 data['complete'] = bool(data.get('origin') and data.get('destination'))
                 return data
             except Exception as e:
-                print(f"[GeminiService] Error calling Gemini API: {e}")
+                print(f"[GroqService] Error calling Groq API: {e}")
                 # Fallback ke heuristic extraction di bawah
 
-        # Heuristic Rule-Based Fallback jika API key belum diset atau ada error
+        # Heuristic Rule-Based Fallback jika API key belum diset atau ada kendala koneksi
         return self._heuristic_extract(user_query)
 
     def _clean_location_name(self, name: str) -> str:
@@ -102,7 +112,11 @@ Teks Pengguna: "{user_query}"
             '', cleaned, flags=re.IGNORECASE
         )
 
-        # 5. Bersihkan tanda baca dan spasi di ujung
+        # 5. Jika setelah dibersihkan hanya menyisakan kata intent/sambung tanpa nama tempat nyata
+        if re.match(r'^(?:mau|ingin|hendak|tujuan|otw|rencana|pengen|start|posisi|arah|dari|ke)$', cleaned, re.IGNORECASE):
+            return ""
+
+        # 6. Bersihkan tanda baca dan spasi di ujung
         cleaned = re.sub(r'[,.\-_]+$', '', cleaned).strip()
         return cleaned
 
@@ -141,6 +155,9 @@ Teks Pengguna: "{user_query}"
                 if match_dest:
                     destination = self._clean_location_name(match_dest.group(1))
 
+        origin = origin if origin else None
+        destination = destination if destination else None
+
         complete = bool(origin and destination)
         return {
             "origin": origin,
@@ -152,7 +169,7 @@ Teks Pengguna: "{user_query}"
         }
 
     def generate_safety_advice(self, origin, destination, vehicle, weather_data, base_advice):
-        """Menyempurnakan kalimat saran keselamatan menggunakan gaya bahasa ramah asisten perjalanan."""
+        """Menyempurnakan kalimat saran keselamatan menggunakan gaya bahasa ramah asisten perjalanan dengan Groq AI."""
         if not self.client:
             return base_advice
 
@@ -166,11 +183,21 @@ Anda adalah asisten SmartRoute AI. Buat 2-3 kalimat saran perjalanan yang ringka
 Saran harus realistis, tidak menjamin keselamatan mutlak, dan mengingatkan kepatuhan lalu lintas.
 """
         try:
-            response = self.client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt
+            chat_completion = self.client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Anda adalah asisten SmartRoute AI yang ramah, ringkas, dan fokus pada keselamatan berkendara di jalan raya."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                model=self.model,
+                temperature=0.3
             )
-            return response.text.strip()
+            return chat_completion.choices[0].message.content.strip()
         except Exception:
             return base_advice
 

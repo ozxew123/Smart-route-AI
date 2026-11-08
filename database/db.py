@@ -2,8 +2,26 @@ import sqlite3
 import os
 from config import Config
 
+_supabase_client = None
+
+def get_supabase_client():
+    """Mengembalikan instance Supabase client jika kredensial tersedia."""
+    global _supabase_client
+    if _supabase_client is not None:
+        return _supabase_client
+    
+    if Config.SUPABASE_URL and Config.SUPABASE_KEY and not Config.SUPABASE_KEY.startswith('your_'):
+        try:
+            from supabase import create_client
+            _supabase_client = create_client(Config.SUPABASE_URL, Config.SUPABASE_KEY)
+            return _supabase_client
+        except Exception as e:
+            print(f"[Supabase] Gagal menginisialisasi client: {e}")
+            return None
+    return None
+
 def get_db_connection():
-    """Membuka koneksi ke database SQLite dengan row_factory dictionary."""
+    """Membuka koneksi ke database SQLite lokal dengan row_factory dictionary."""
     os.makedirs(os.path.dirname(Config.DATABASE_PATH), exist_ok=True)
     conn = sqlite3.connect(Config.DATABASE_PATH)
     conn.row_factory = sqlite3.Row

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session, redirect
-from services.gemini_service import GeminiService
+from services.groq_service import GroqService
 from services.map_service import MapService
 from services.weather_service import WeatherService
 from services.decision_engine import DecisionEngine
@@ -7,7 +7,7 @@ from models.history_model import HistoryModel
 
 route_bp = Blueprint('route', __name__)
 
-gemini_service = GeminiService()
+groq_service = GroqService()
 map_service = MapService()
 weather_service = WeatherService()
 
@@ -35,7 +35,7 @@ def api_status():
 def process_route():
     """
     Endpoint utama integrasi (API Chaining):
-    1. NLP Gemini (ekstraksi asal, tujuan, kendaraan)
+    1. NLP Groq AI (ekstraksi asal, tujuan, kendaraan)
     2. Nominatim Geocoding
     3. OSRM Routing & Midpoint
     4. OpenWeatherMap 3-Point Weather Sampling
@@ -54,7 +54,7 @@ def process_route():
         return jsonify({"success": False, "message": "Teks instruksi perjalanan maksimal 300 karakter."}), 400
 
     # 1. NLP Ekstraksi
-    nlp_result = gemini_service.extract_entities(user_query)
+    nlp_result = groq_service.extract_entities(user_query)
     origin_name = nlp_result.get('origin')
     dest_name = nlp_result.get('destination')
     vehicle = override_vehicle or nlp_result.get('vehicle', 'motor')
@@ -106,7 +106,7 @@ def process_route():
     base_advice = DecisionEngine.build_safety_advice(
         risk_analysis, vehicle=vehicle, distance_km=route_data['distance_km']
     )
-    final_advice = gemini_service.generate_safety_advice(
+    final_advice = groq_service.generate_safety_advice(
         origin_name, dest_name, vehicle, weather_3pts, base_advice
     )
 

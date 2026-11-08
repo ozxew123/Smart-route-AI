@@ -300,7 +300,7 @@ function HomeContent() {
                   <span>Asisten Rute & Cuaca</span>
                 </h5>
                 <span className="text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-full">
-                  Gemini NLP
+                  Groq AI LPU
                 </span>
               </div>
               <p className="text-xs text-slate-500 mb-3 sm:mb-4 leading-relaxed">

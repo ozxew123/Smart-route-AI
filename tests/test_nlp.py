@@ -1,9 +1,9 @@
 import unittest
-from services.gemini_service import GeminiService
+from services.groq_service import GroqService
 
 class TestNLP(unittest.TestCase):
     def test_heuristic_nlp_extraction(self):
-        service = GeminiService()
+        service = GroqService()
         query = "Saya mau berangkat dari Depok ke Monas naik motor"
         result = service._heuristic_extract(query)
         self.assertEqual(result["origin"], "depok")
@@ -12,7 +12,7 @@ class TestNLP(unittest.TestCase):
         self.assertTrue(result["complete"])
 
     def test_incomplete_query(self):
-        service = GeminiService()
+        service = GroqService()
         query = "Mau ke Monas"
         result = service._heuristic_extract(query)
         self.assertIsNone(result["origin"])

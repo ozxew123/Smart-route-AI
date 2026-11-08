@@ -295,7 +295,7 @@ export default function HistoryPage() {
             </span>
             <span>•</span>
             <span>
-              AI Decision Engine: <strong className="text-slate-700">Gemini 1.5 Siaga</strong>
+              AI Decision Engine: <strong className="text-slate-700">Groq AI Ultra-Fast LPU</strong>
             </span>
           </div>
         </div>
@@ -789,7 +789,7 @@ export default function HistoryPage() {
       <footer className="bg-white/80 backdrop-blur-md border-t border-slate-200 py-4 text-xs text-slate-500 z-10">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>&copy; 2026 SmartRoute AI — Asisten Navigasi & Telemetri Cuaca Real-Time.</span>
-          <span>OSRM Routing Engine • OpenWeatherMap API • Gemini AI Advisor</span>
+          <span>OSRM Routing Engine • OpenWeatherMap API • Groq AI Advisor</span>
         </div>
       </footer>
     </div>

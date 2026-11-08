@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS search_histories (
     vehicle VARCHAR(50) DEFAULT 'motor',
     route_summary TEXT,      -- JSON/ringkasan data rute & geometri
     weather_summary TEXT,    -- JSON ringkasan cuaca 3 titik
-    ai_advice TEXT,          -- Saran keselamatan dari decision engine/Gemini
+    ai_advice TEXT,          -- Saran keselamatan dari decision engine/Groq AI
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
