@@ -62,8 +62,10 @@ export async function sendOtpEmail(toEmail: string, otpCode: string): Promise<{ 
   }
 
   try {
+    const fromAddress = process.env.EMAIL_FROM || "SmartRoute AI <onboarding@resend.dev>";
+
     const { error } = await resendClient.emails.send({
-      from: "SmartRoute AI <onboarding@resend.dev>",
+      from: fromAddress,
       to: [cleanEmail],
       subject: `[${otpCode}] Kode OTP Reset Kata Sandi - SmartRoute AI`,
       html: `
