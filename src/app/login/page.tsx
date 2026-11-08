@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,18 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  // Jika sudah login, langsung arahkan ke /home (Navigator)
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.authenticated) {
+          router.replace("/home");
+        }
+      })
+      .catch(() => {});
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -21,7 +33,7 @@ export default function LoginPage() {
     setSuccessMsg("");
 
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -33,32 +45,15 @@ export default function LoginPage() {
         if (data.user) {
           localStorage.setItem("smartroute_user_profile", JSON.stringify(data.user));
         }
-        setSuccessMsg("Berhasil masuk! Mengalihkan ke dashboard...");
-        setTimeout(() => {
-          router.push("/home");
-        }, 800);
-      } else {
-        // Fallback for direct browser testing if backend isn't yet session-linked
-        if (email && password) {
-          localStorage.setItem("smartroute_user_profile", JSON.stringify({ nama: email.split("@")[0], email }));
-          setSuccessMsg("Selamat datang kembali! Mengalihkan...");
-          setTimeout(() => {
-            router.push("/home");
-          }, 600);
-        } else {
-          setErrorMsg(data?.message || "Email atau kata sandi tidak valid.");
-        }
-      }
-    } catch {
-      // In development / demo mode, allow login to proceed
-      if (email && password) {
-        setSuccessMsg("Berhasil masuk! Mengalihkan ke perencana rute...");
+        setSuccessMsg("Berhasil masuk! Mengalihkan ke Navigator...");
         setTimeout(() => {
           router.push("/home");
         }, 600);
       } else {
-        setErrorMsg("Gagal terhubung ke server autentikasi.");
+        setErrorMsg(data?.message || "Email atau kata sandi tidak valid.");
       }
+    } catch {
+      setErrorMsg("Gagal terhubung ke server autentikasi.");
     } finally {
       setIsLoading(false);
     }

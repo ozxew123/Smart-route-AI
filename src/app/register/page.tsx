@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,18 @@ export default function RegisterPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  // Jika sudah login, langsung arahkan ke /home (Navigator)
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.authenticated) {
+          router.replace("/home");
+        }
+      })
+      .catch(() => {});
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -22,7 +34,7 @@ export default function RegisterPage() {
     setSuccessMsg("");
 
     try {
-      const response = await fetch("/api/register", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nama, email, password }),
@@ -37,27 +49,12 @@ export default function RegisterPage() {
         setSuccessMsg("Akun berhasil dibuat! Mengalihkan ke login...");
         setTimeout(() => {
           router.push("/login");
-        }, 1200);
+        }, 1000);
       } else {
-        // Fallback for development if Flask returns HTML redirect or demo test
-        if (nama && email && password) {
-          setSuccessMsg("Pendaftaran berhasil! Mengalihkan...");
-          setTimeout(() => {
-            router.push("/home");
-          }, 800);
-        } else {
-          setErrorMsg(data?.message || "Gagal melakukan registrasi akun.");
-        }
+        setErrorMsg(data?.message || "Gagal melakukan registrasi akun.");
       }
     } catch {
-      if (nama && email && password) {
-        setSuccessMsg("Akun berhasil didaftarkan (mode demo)! Mengalihkan...");
-        setTimeout(() => {
-          router.push("/home");
-        }, 800);
-      } else {
-        setErrorMsg("Gagal terhubung ke server autentikasi.");
-      }
+      setErrorMsg("Gagal terhubung ke server autentikasi.");
     } finally {
       setIsLoading(false);
     }
