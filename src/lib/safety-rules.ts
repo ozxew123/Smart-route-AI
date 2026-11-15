@@ -2,9 +2,10 @@
  * SmartRoute AI - Special Safety & Mobility Rules Engine
  * 1. Jas Hujan Pitstop Predictor (Raincoat pitstop calculation)
  * 2. Zero-Tilang Motor & Ganjil-Genap Guard
+ * 3. Evaluasi Ketepatan Waktu Tiba (ETA vs Target Arrival Time)
  */
 
-import { ThreePointsWeather } from "./weather";
+import { ThreePointsWeather, getWIBDate } from "./weather";
 
 export interface PitstopRecommendation {
   needed: boolean;
@@ -26,6 +27,17 @@ export interface ZeroTilangAnalysis {
   today_rule: "Ganjil" | "Genap";
   user_plate: "Ganjil" | "Genap";
   is_rush_hour: boolean;
+}
+
+export interface ArrivalEvaluation {
+  has_target: boolean;
+  departure_time: string;
+  eta: string;
+  target_arrival_time: string | null;
+  arrival_status: "tepat_waktu" | "berisiko_terlambat" | null;
+  delay_risk_min: number;
+  latest_departure_time: string | null;
+  message: string;
 }
 
 // Titik rawan jalan layang non-tol & tol yang dilarang motor di Jabodetabek
@@ -134,9 +146,7 @@ export function evaluateZeroTilang(
   const combinedText = `${origin} ${destination}`.toLowerCase();
 
   // Waktu WIB Sekarang
-  const now = new Date();
-  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-  const wib = new Date(utc + 3600000 * 7);
+  const wib = getWIBDate();
 
   const dayOfWeek = wib.getDay(); // 0 = Minggu, 6 = Sabtu
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
@@ -240,3 +250,93 @@ export function evaluateZeroTilang(
   };
 }
 
+/**
+ * 3. Evaluasi Ketepatan Waktu Tiba (ETA vs Target Arrival Time)
+ * Menghitung waktu keberangkatan, ETA, selisih keterlambatan, dan saran jam berangkat paling lambat.
+ */
+export function evaluateArrivalTime(
+  durationMin: number,
+  targetArrivalTimeInput?: string | null,
+  baseDate: Date = new Date()
+): ArrivalEvaluation {
+  const wib = getWIBDate(baseDate);
+
+  const depHour = wib.getHours();
+  const depMin = wib.getMinutes();
+  const depTotalMin = depHour * 60 + depMin;
+
+  const departureTimeStr = `${String(depHour).padStart(2, "0")}:${String(depMin).padStart(2, "0")} WIB`;
+
+  const etaTotalMin = depTotalMin + durationMin;
+  const etaHour = Math.floor(etaTotalMin / 60) % 24;
+  const etaMinRemainder = etaTotalMin % 60;
+  const etaStr = `${String(etaHour).padStart(2, "0")}:${String(etaMinRemainder).padStart(2, "0")} WIB`;
+
+  if (!targetArrivalTimeInput || !targetArrivalTimeInput.trim()) {
+    return {
+      has_target: false,
+      departure_time: departureTimeStr,
+      eta: etaStr,
+      target_arrival_time: null,
+      arrival_status: null,
+      delay_risk_min: 0,
+      latest_departure_time: null,
+      message: `Estimasi tiba di tujuan pukul ${etaStr} (perjalanan ±${durationMin} menit).`,
+    };
+  }
+
+  const match = targetArrivalTimeInput.trim().match(/(\d{1,2}):(\d{2})/);
+  if (!match) {
+    return {
+      has_target: false,
+      departure_time: departureTimeStr,
+      eta: etaStr,
+      target_arrival_time: null,
+      arrival_status: null,
+      delay_risk_min: 0,
+      latest_departure_time: null,
+      message: `Estimasi tiba di tujuan pukul ${etaStr}.`,
+    };
+  }
+
+  const targetH = parseInt(match[1], 10);
+  const targetM = parseInt(match[2], 10);
+  let targetTotalMin = targetH * 60 + targetM;
+  const targetDisplay = `${String(targetH).padStart(2, "0")}:${String(targetM).padStart(2, "0")} WIB`;
+
+  // Tangani pergantian hari: jika target < waktu berangkat lebih dari 6 jam (misal berangkat 23:00, target 01:00)
+  if (targetTotalMin < depTotalMin && (depTotalMin - targetTotalMin) > 360) {
+    targetTotalMin += 1440;
+  }
+
+  const diff = etaTotalMin - targetTotalMin;
+  const isLate = diff > 0;
+  const delayRiskMin = isLate ? diff : 0;
+  const arrivalStatus: "tepat_waktu" | "berisiko_terlambat" = isLate ? "berisiko_terlambat" : "tepat_waktu";
+
+  // Saran jam berangkat paling lambat: Target - Durasi - 10 menit buffer keselamatan
+  let latestDepMin = targetTotalMin - durationMin - 10;
+  while (latestDepMin < 0) latestDepMin += 1440;
+  const latestH = Math.floor(latestDepMin / 60) % 24;
+  const latestM = latestDepMin % 60;
+  const latestDepStr = `${String(latestH).padStart(2, "0")}:${String(latestM).padStart(2, "0")} WIB`;
+
+  let message = "";
+  if (isLate) {
+    message = `⚠️ Berisiko terlambat ±${delayRiskMin} menit dari target tiba (${targetDisplay}). Perkiraan jam tiba ${etaStr}. Disarankan berangkat maksimal pukul ${latestDepStr} untuk mengantisipasi macet.`;
+  } else {
+    const margin = targetTotalMin - etaTotalMin;
+    message = `✅ Tepat Waktu! Perkiraan tiba ${etaStr}, sekitar ${margin} menit sebelum target jam ${targetDisplay}.`;
+  }
+
+  return {
+    has_target: true,
+    departure_time: departureTimeStr,
+    eta: etaStr,
+    target_arrival_time: targetDisplay,
+    arrival_status: arrivalStatus,
+    delay_risk_min: delayRiskMin,
+    latest_departure_time: latestDepStr,
+    message,
+  };
+}

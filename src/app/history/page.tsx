@@ -36,7 +36,19 @@ interface HistoryItem {
   destination: string;
   vehicle: string;
   raw_query: string;
-  route_data?: { distance_km?: number; duration_min?: number };
+  route_data?: {
+    distance_km?: number;
+    duration_min?: number;
+    normal_duration_min?: number;
+    traffic_delay_min?: number;
+    departure_time?: string;
+    eta?: string;
+    target_arrival_time?: string | null;
+    arrival_status?: string | null;
+    delay_risk_min?: number;
+    latest_departure_time?: string | null;
+    routing_engine?: string;
+  };
   weather_data?: {
     origin?: { name?: string; temp?: number; description?: string };
     midpoint?: { name?: string; temp?: number; description?: string };
@@ -363,14 +375,24 @@ export default function HistoryPage() {
                             )}
                           </td>
 
-                          {/* Jarak */}
+                          {/* Jarak & Durasi */}
                           <td className="py-4 px-5 whitespace-nowrap">
                             <div className="font-bold text-slate-800 text-xs">
                               {item.route_data?.distance_km ? `${item.route_data.distance_km} km` : "-"}
                             </div>
-                            <div className="text-[11px] text-slate-400">
-                              {item.route_data?.duration_min ? `${item.route_data.duration_min} menit` : "-"}
+                            <div className="text-[11px] text-slate-500 font-medium">
+                              {item.route_data?.duration_min ? `~${item.route_data.duration_min} menit` : "-"}
+                              {item.route_data?.traffic_delay_min && item.route_data.traffic_delay_min > 0 ? (
+                                <span className="ml-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-1 py-0.2 rounded border border-amber-200">
+                                  +{item.route_data.traffic_delay_min}m macet
+                                </span>
+                              ) : null}
                             </div>
+                            {item.route_data?.eta && (
+                              <div className="text-[10px] text-sky-600 font-semibold mt-0.5">
+                                ETA {item.route_data.eta}
+                              </div>
+                            )}
                           </td>
 
                           {/* Saran */}
@@ -466,11 +488,31 @@ export default function HistoryPage() {
 
                       <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
                         <span>Jarak: <strong className="text-slate-800">{item.route_data?.distance_km ? `${item.route_data.distance_km} km` : "-"}</strong></span>
-                        <span>Durasi: <strong className="text-slate-800">{item.route_data?.duration_min ? `${item.route_data.duration_min} min` : "-"}</strong></span>
+                        <span>
+                          Durasi: <strong className="text-slate-800">{item.route_data?.duration_min ? `${item.route_data.duration_min} min` : "-"}</strong>
+                          {item.route_data?.traffic_delay_min && item.route_data.traffic_delay_min > 0 ? (
+                            <span className="text-[10px] text-amber-700 font-bold ml-1">
+                              (+{item.route_data.traffic_delay_min}m macet)
+                            </span>
+                          ) : null}
+                        </span>
                         <button onClick={() => setSelectedDetail(item)} className="text-sky-600 font-semibold hover:underline">
                           Detail
                         </button>
                       </div>
+
+                      {item.route_data?.eta && (
+                        <div className="text-[11px] font-semibold text-sky-800 bg-sky-50 px-2.5 py-1 rounded-xl flex items-center justify-between border border-sky-100">
+                          <span>Waktu: {item.route_data?.departure_time || "Berangkat"} ➔ ETA {item.route_data.eta}</span>
+                          {item.route_data?.arrival_status && (
+                            <span className={`text-[10px] font-bold uppercase ${
+                              item.route_data.arrival_status === "berisiko_terlambat" ? "text-rose-600" : "text-emerald-600"
+                            }`}>
+                              {item.route_data.arrival_status === "berisiko_terlambat" ? "Terlambat" : "Tepat Waktu"}
+                            </span>
+                          )}
+                        </div>
+                      )}
 
                       <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                         <Link
@@ -530,6 +572,45 @@ export default function HistoryPage() {
                   <div className="font-bold text-xs text-slate-800">{selectedDetail.destination}</div>
                 </div>
               </div>
+
+              {/* Detail Rute & Live Traffic */}
+              {selectedDetail.route_data && (
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Jarak Tempuh:</span>
+                    <strong className="text-slate-900 font-extrabold">{selectedDetail.route_data.distance_km || "-"} km</strong>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Estimasi Durasi:</span>
+                    <div className="text-right">
+                      <strong className="text-slate-900 font-extrabold">~{selectedDetail.route_data.duration_min || "-"} menit</strong>
+                      {selectedDetail.route_data.traffic_delay_min && selectedDetail.route_data.traffic_delay_min > 0 ? (
+                        <span className="ml-1.5 text-[10px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200">
+                          +{selectedDetail.route_data.traffic_delay_min} mnt macet
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                  {selectedDetail.route_data.eta && (
+                    <div className="flex justify-between items-center pt-1.5 border-t border-slate-200 text-sky-800">
+                      <span className="font-semibold">Jadwal Tiba:</span>
+                      <strong className="font-black text-sky-900 text-xs">
+                        {selectedDetail.route_data.departure_time ? `${selectedDetail.route_data.departure_time} ➔ ` : ""}ETA {selectedDetail.route_data.eta}
+                      </strong>
+                    </div>
+                  )}
+                  {selectedDetail.route_data.target_arrival_time && (
+                    <div className="flex justify-between items-center pt-1.5 border-t border-slate-200">
+                      <span className="text-slate-500">Target Tiba:</span>
+                      <span className={`font-bold text-[11px] ${
+                        selectedDetail.route_data.arrival_status === "berisiko_terlambat" ? "text-rose-600" : "text-emerald-600"
+                      }`}>
+                        {selectedDetail.route_data.target_arrival_time} ({selectedDetail.route_data.arrival_status === "berisiko_terlambat" ? "Berisiko Terlambat" : "Tepat Waktu"})
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {selectedDetail.weather_data && (
                 <div className="space-y-1.5">
