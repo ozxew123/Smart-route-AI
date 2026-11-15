@@ -20,7 +20,13 @@ import {
   Bike,
   Car,
   Menu,
-  X
+  X,
+  Compass,
+  Clock,
+  Layers,
+  HelpCircle,
+  Check,
+  MapPin
 } from "lucide-react";
 
 const demoData = [
@@ -357,6 +363,83 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Comparison Section: SmartRoute AI vs Google Maps */}
+      <section className="py-14 sm:py-20 bg-slate-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-900/40 via-slate-900 to-slate-900 pointer-events-none" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+            <span className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-2 block">
+              Diferensiasi Produk
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+              Mengapa Bukan Google Maps Biasa?
+            </h2>
+            <p className="text-sm sm:text-base text-slate-400 mt-3 leading-relaxed">
+              Google Maps mencari rute tercepat, tetapi sering mengabaikan realitas keselamatan pengendara motor dan komuter kota.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+            {/* Navigasi Biasa */}
+            <div className="bg-slate-800/60 border border-slate-700/80 rounded-3xl p-6 sm:p-8 backdrop-blur">
+              <div className="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider mb-4">
+                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                Navigasi Konvensional
+              </div>
+              <h3 className="text-lg font-bold text-slate-200 mb-5">Hanya Tercepat, Bukan Teraman</h3>
+              <ul className="space-y-3.5 text-xs sm:text-sm text-slate-400">
+                <li className="flex items-start gap-3">
+                  <span className="text-rose-400 font-bold">✕</span>
+                  <span>Tidak mempedulikan Anda kehujanan di jalan layang tanpa tempat berteduh.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-rose-400 font-bold">✕</span>
+                  <span>Sering mengarahkan motor ke JLNT Casablanca atau Antasari yang dilarang & kena tilang.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-rose-400 font-bold">✕</span>
+                  <span>Hanya tahu cuaca di lokasi awal, buta kondisi hujan di kilometer tengah jalur.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-rose-400 font-bold">✕</span>
+                  <span>Instruksi suara kaku ("200m belok ke barat daya") yang membingungkan pengendara.</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* SmartRoute AI */}
+            <div className="bg-gradient-to-b from-sky-950/80 to-slate-900 border-2 border-sky-500/80 rounded-3xl p-6 sm:p-8 relative shadow-2xl shadow-sky-950/50 backdrop-blur">
+              <div className="absolute -top-3 right-6 bg-gradient-to-r from-sky-500 to-cyan-500 text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-md">
+                SmartRoute AI PRO
+              </div>
+              <div className="flex items-center gap-2 text-sky-400 font-bold text-xs uppercase tracking-wider mb-4">
+                <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                Didesain untuk Komuter Nyata
+              </div>
+              <h3 className="text-lg font-bold text-white mb-5">Proaktif Melindungi Sebelum Basah & Kena Tilang</h3>
+              <ul className="space-y-3.5 text-xs sm:text-sm text-slate-200">
+                <li className="flex items-start gap-3">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span><strong>Jas Hujan Pitstop:</strong> Rekomendasi SPBU & shelter 1.5 km sebelum titik hujan lebat.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span><strong>Zero-Tilang Guard:</strong> Menghindari JLNT Casablanca/Antasari & kalkulasi Ganjil-Genap otomatis.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span><strong>Telemetri 3 Titik:</strong> Radar cuaca awal, tengah, dan akhir perjalanan secara simultan.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span><strong>TomTom Live Traffic:</strong> Estimasi kemacetan real-time & evaluasi jam tiba target komuter.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Feature Section */}
       <section id="fitur" className="scroll-mt-20 py-14 sm:py-20 bg-white border-t border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -368,46 +451,115 @@ export default function LandingPage() {
               Kecerdasan Buatan untuk Setiap Kilometer
             </h2>
             <p className="text-sm text-slate-500 mt-2">
-              Didesain khusus untuk pengendara motor dan mobil komuter perkotaan.
+              Didesain khusus untuk pengendara motor dan mobil komuter perkotaan Jabodetabek.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-4">
-                <Mic className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* Feature 1 */}
+            <div className="p-6 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-violet-100 text-violet-700 flex items-center justify-center mb-4 text-2xl">
+                  🧥
+                </div>
+                <div className="text-[10px] font-bold text-violet-700 bg-violet-50 px-2.5 py-0.5 rounded-full w-fit mb-2">
+                  Khusus Pemotor
+                </div>
+                <h3 className="font-bold text-base text-slate-900 mb-2">Jas Hujan Pitstop</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Deteksi radar hujan di depan rute dan sarankan SPBU Pertamina / shelter kanopi 1.5 km sebelum titik basah agar Anda siap sedia.
+                </p>
               </div>
-              <h3 className="font-bold text-base text-slate-900 mb-2">Input Suara & NLP Pintar</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Tulis atau ucapkan kalimat santai sehari-hari. Groq AI mengekstrak lokasi asal, tujuan, moda kendaraan, dan preferensi rute secepat kilat.
-              </p>
             </div>
 
-            <div className="p-6 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center mb-4">
-                <CloudSun className="w-6 h-6" />
+            {/* Feature 2 */}
+            <div className="p-6 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full w-fit mb-2">
+                  Bebas Tilang ETLE
+                </div>
+                <h3 className="font-bold text-base text-slate-900 mb-2">Zero-Tilang Guard</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Proteksi motor dari JLNT Casablanca, Antasari, dan Flyover Pesing. Untuk mobil, kalkulasi otomatis aturan Ganjil-Genap Jakarta.
+                </p>
               </div>
-              <h3 className="font-bold text-base text-slate-900 mb-2">Cuaca Multi-Titik (3 Titik)</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Menghindari jebakan hujan mendadak dengan mengambil sampel cuaca OpenWeatherMap pada titik awal, tengah jalur, dan titik akhir perjalanan.
-              </p>
             </div>
 
-            <div className="p-6 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4">
-                <ShieldCheck className="w-6 h-6" />
+            {/* Feature 3 */}
+            <div className="p-6 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center mb-4">
+                  <CloudSun className="w-6 h-6" />
+                </div>
+                <div className="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-2.5 py-0.5 rounded-full w-fit mb-2">
+                  OpenWeather Radar
+                </div>
+                <h3 className="font-bold text-base text-slate-900 mb-2">Cuaca 3-Titik Simultan</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Menghilangkan titik buta cuaca dengan memantau suhu, curah hujan, dan kelembapan di titik awal, tengah jalur, dan tujuan akhir.
+                </p>
               </div>
-              <h3 className="font-bold text-base text-slate-900 mb-2">AI Safety Advisor</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Decision engine cerdas yang memberikan panduan keselamatan proaktif seperti peringatan jas hujan setelan, perlambatan kecepatan, dan evaluasi aspal licin.
-              </p>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="p-6 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-4">
+                  <Mic className="w-6 h-6" />
+                </div>
+                <div className="text-[10px] font-bold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full w-fit mb-2">
+                  Groq AI LPU &lt; 1s
+                </div>
+                <h3 className="font-bold text-base text-slate-900 mb-2">Input Suara & Teks Bebas</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Cukup ketik atau ucapkan rute bahasa sehari-hari. Asisten AI langsung mengekstrak asal, tujuan, target jam tiba, dan preferensi rute.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Tech Stack & Architecture Badges */}
+      <section className="py-10 bg-slate-50 border-t border-slate-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-5">
+            Ditenagai oleh Arsitektur Modern Berkinerja Tinggi
+          </span>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs font-semibold text-slate-600">
+            <span className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-slate-900" />
+              Next.js 14 App Router
+            </span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              Supabase Cloud PostgreSQL
+            </span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              Groq AI LPU (Ultra-Fast)
+            </span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-sky-500" />
+              OpenWeather Radar Telemetry
+            </span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-rose-500" />
+              TomTom Live Traffic Engine
+            </span>
+            <span className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-indigo-500" />
+              Resend OTP Verification
+            </span>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
-      <section id="cara-kerja" className="scroll-mt-20 py-14 sm:py-20 bg-slate-50/80 border-t border-slate-200">
+      <section id="cara-kerja" className="scroll-mt-20 py-14 sm:py-20 bg-white border-t border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-xs font-bold text-sky-600 uppercase tracking-wider mb-2 block">
@@ -423,8 +575,8 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
             {/* Step 1 */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-              <div className="text-[11px] font-extrabold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full w-fit mb-4">
+            <div className="bg-slate-50/70 rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full w-fit mb-4 border border-sky-100">
                 Langkah 01
               </div>
               <h3 className="font-bold text-lg text-slate-900 mb-2">Ketik atau Sebutkan Rute</h3>
@@ -434,24 +586,70 @@ export default function LandingPage() {
             </div>
 
             {/* Step 2 */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-              <div className="text-[11px] font-extrabold uppercase tracking-wider text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full w-fit mb-4">
+            <div className="bg-slate-50/70 rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full w-fit mb-4 border border-cyan-100">
                 Langkah 02
               </div>
               <h3 className="font-bold text-lg text-slate-900 mb-2">Analisis Jalur & Cuaca Multi-Titik</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Mesin routing OSRM menghitung geometri jalan tercepat dan OpenWeatherMap menyuplai kondisi cuaca riil di titik awal, tengah, dan akhir.
+                Mesin routing TomTom & OSRM menghitung rute, lalu OpenWeatherMap menyuplai kondisi cuaca riil di titik awal, tengah, dan akhir.
               </p>
             </div>
 
             {/* Step 3 */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-              <div className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full w-fit mb-4">
+            <div className="bg-slate-50/70 rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full w-fit mb-4 border border-emerald-100">
                 Langkah 03
               </div>
               <h3 className="font-bold text-lg text-slate-900 mb-2">Panduan Keselamatan & Mulai Jalan</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Dapatkan estimasi waktu tempuh, visualisasi peta rute interaktif, serta rekomendasi keselamatan AI sebelum hujan menghadang di jalan.
+                Dapatkan estimasi waktu tempuh, titik pitstop jas hujan, status zero-tilang, dan rekomendasi AI sebelum hujan menghadang.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-14 sm:py-20 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <span className="text-xs font-bold text-sky-600 uppercase tracking-wider mb-2 block">
+              Pertanyaan Umum
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Tanya Jawab Seputar SmartRoute AI
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-sky-600 flex-shrink-0" />
+                <span>Kenapa SmartRoute AI memantau 3 titik cuaca sekaligus?</span>
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Di kota tropis seperti Jabodetabek, cuaca di titik keberangkatan sering kali cerah, tetapi di tengah jalan (misal Pasar Minggu atau Cawang) sudah turun hujan deras. Pemantauan 3 titik (Awal, Tengah, Akhir) memastikan Anda tidak terjebak badai mendadak tanpa persiapan.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-sky-600 flex-shrink-0" />
+                <span>Bagaimana cara kerja fitur Pitstop Jas Hujan?</span>
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Ketika sistem mendeteksi potensi hujan di titik tengah atau destinasi, algoritma kami secara otomatis menandai lokasi singgah aman (seperti SPBU Pertamina atau flyover berkanopi) sekitar 1.5 km sebelum zona hujan, sehingga Anda bisa berhenti memakai jas hujan sebelum basah kuyup.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-sky-600 flex-shrink-0" />
+                <span>Apa itu proteksi Zero-Tilang untuk motor?</span>
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Di Jakarta, jalan layang non-tol seperti JLNT Casablanca dan JLNT Antasari sangat berbahaya bagi motor dan dijaga tilang kamera ETLE. SmartRoute AI memproteksi rute Anda agar tetap berada di jalur arteri bawah yang aman dan legal bagi pengendara motor.
               </p>
             </div>
           </div>
@@ -469,10 +667,10 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/home"
+              href="/register"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-sky-700 hover:bg-sky-50 font-bold px-7 py-3.5 rounded-full shadow-lg transition-transform hover:-translate-y-0.5 text-sm sm:text-base"
             >
-              <span>Mulai Rencana Rute Sekarang</span>
+              <span>Daftar Akun Gratis Sekarang</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
