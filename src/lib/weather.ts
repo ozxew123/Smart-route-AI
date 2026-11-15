@@ -34,21 +34,33 @@ export interface RiskAnalysis {
 const OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
 const weatherApiKey = process.env.OPENWEATHER_API_KEY || "";
 
-function getCurrentTimeWIB(): string {
-  const now = new Date();
-  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-  const wib = new Date(utc + 3600000 * 7);
+/**
+ * Mendapatkan waktu terstandarisasi Waktu Indonesia Barat (WIB / UTC+7)
+ */
+export function getWIBDate(date: Date = new Date()): Date {
+  const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+  return new Date(utc + 3600000 * 7);
+}
+
+export function getCurrentTimeWIB(date: Date = new Date()): string {
+  const wib = getWIBDate(date);
   const hours = String(wib.getHours()).padStart(2, "0");
   const mins = String(wib.getMinutes()).padStart(2, "0");
   return `${hours}:${mins} WIB`;
 }
 
+export function formatTimeWIB(date: Date, labelSuffix?: string): string {
+  const timeStr = getCurrentTimeWIB(date);
+  return labelSuffix ? `${timeStr} (${labelSuffix})` : timeStr;
+}
+
 export async function getWeatherAtPoint(
   lat: number,
   lon: number,
-  label: string = "Titik"
+  label: string = "Titik",
+  customRefTime?: string
 ): Promise<WeatherPoint> {
-  const refTime = getCurrentTimeWIB();
+  const refTime = customRefTime || getCurrentTimeWIB();
 
   if (!weatherApiKey || weatherApiKey === "your_openweather_api_key_here") {
     return {
@@ -118,25 +130,46 @@ export async function getWeatherAtPoint(
 export async function sampleThreePoints(
   originCoords: { lat: number; lon: number },
   midpointCoords: { lat: number; lon: number } | null,
-  destCoords: { lat: number; lon: number }
+  destCoords: { lat: number; lon: number },
+  durationMin: number = 0
 ): Promise<ThreePointsWeather> {
-  const origin = await getWeatherAtPoint(originCoords.lat, originCoords.lon, "Titik Asal");
+  const now = new Date();
+
+  // 1. Waktu Berangkat di Titik Awal
+  const originTime = formatTimeWIB(now, "Berangkat");
+
+  // 2. Waktu Lintasan di Titik Tengah (T_berangkat + duration_min / 2)
+  const midMin = Math.round(durationMin / 2);
+  const midDate = new Date(now.getTime() + midMin * 60000);
+  const midTime = formatTimeWIB(midDate, `+${midMin} mnt`);
+
+  // 3. Waktu Kedatangan (ETA) di Titik Akhir (T_berangkat + duration_min)
+  const destDate = new Date(now.getTime() + durationMin * 60000);
+  const destTime = formatTimeWIB(destDate, "ETA");
+
+  const origin = await getWeatherAtPoint(originCoords.lat, originCoords.lon, "Titik Asal", originTime);
 
   let midpoint: WeatherPoint;
   if (midpointCoords) {
     midpoint = await getWeatherAtPoint(
       midpointCoords.lat,
       midpointCoords.lon,
-      "Tengah Rute (Midpoint)"
+      "Tengah Rute (Midpoint)",
+      midTime
     );
   } else {
-    // Estimasi matematis jika OSRM midpoint tidak tersedia
+    // Estimasi matematis jika midpoint tidak tersedia
     const avgLat = (originCoords.lat + destCoords.lat) / 2;
     const avgLon = (originCoords.lon + destCoords.lon) / 2;
-    midpoint = await getWeatherAtPoint(avgLat, avgLon, "Tengah Rute (Midpoint)");
+    midpoint = await getWeatherAtPoint(avgLat, avgLon, "Tengah Rute (Midpoint)", midTime);
   }
 
-  const destination = await getWeatherAtPoint(destCoords.lat, destCoords.lon, "Titik Tujuan");
+  const destination = await getWeatherAtPoint(
+    destCoords.lat,
+    destCoords.lon,
+    "Titik Tujuan",
+    destTime
+  );
 
   return { origin, midpoint, destination };
 }
@@ -252,4 +285,3 @@ export function buildSafetyAdvice(
   advicePoints.push("Patuhi selalu rambu lalu lintas demi keselamatan bersama.");
   return advicePoints.join(" ");
 }
-

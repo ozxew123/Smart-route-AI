@@ -86,9 +86,28 @@ function HomeContent() {
       coordinates: [number, number][];
       distance_km: number;
       duration_min: number;
+      normal_duration_min?: number;
+      traffic_delay_min?: number;
+      departure_time?: string;
+      eta?: string;
+      target_arrival_time?: string | null;
+      arrival_status?: "tepat_waktu" | "berisiko_terlambat" | null;
+      delay_risk_min?: number;
+      latest_departure_time?: string | null;
+      routing_engine?: "tomtom" | "osrm";
       origin: { lat: number; lon: number };
       midpoint: { lat: number; lon: number };
       destination: { lat: number; lon: number };
+    };
+    arrival_evaluation?: {
+      has_target: boolean;
+      departure_time: string;
+      eta: string;
+      target_arrival_time: string | null;
+      arrival_status: "tepat_waktu" | "berisiko_terlambat" | null;
+      delay_risk_min: number;
+      latest_departure_time: string | null;
+      message: string;
     };
     weather?: {
       origin: WeatherNode;
@@ -109,6 +128,7 @@ function HomeContent() {
       destination: string;
       vehicle: string;
       plate?: string;
+      target_arrival_time?: string | null;
     };
     pitstop?: {
       needed: boolean;
@@ -684,15 +704,67 @@ function HomeContent() {
             )}
 
             {/* ========================================================
-                 FR-03: INFORMASI DETAIL RUTE (OSRM ROUTING ENGINE)
-                 Asal, Tujuan, Kendaraan, Jarak, dan Estimasi Waktu
+                 FR-03: INFORMASI DETAIL RUTE (TOMTOM ROUTING & LIVE TRAFFIC)
+                 Asal, Tujuan, Kendaraan, Jarak, ETA, dan Evaluasi Waktu Tiba
                  ======================================================== */}
             {resultData && resultData.route && (
               <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm animate-fadeIn">
-                <h6 className="font-extrabold text-slate-900 text-sm mb-3 flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-sky-600" />
-                  <span>Ringkasan perjalanan</span>
-                </h6>
+                <div className="flex items-center justify-between mb-3">
+                  <h6 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-sky-600" />
+                    <span>Ringkasan perjalanan</span>
+                  </h6>
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${
+                    resultData.route.routing_engine === "tomtom"
+                      ? "bg-sky-50 text-sky-700 border-sky-200"
+                      : "bg-slate-100 text-slate-600 border-slate-200"
+                  }`}>
+                    {resultData.route.routing_engine === "tomtom" ? "TomTom Live Traffic" : "OSRM Fallback"}
+                  </span>
+                </div>
+
+                {/* Target Arrival Time & Evaluasi Ketepatan Waktu */}
+                {resultData.route.target_arrival_time && (
+                  <div
+                    className={`p-3.5 rounded-2xl mb-3.5 border transition-all ${
+                      resultData.route.arrival_status === "berisiko_terlambat"
+                        ? "bg-rose-50/90 border-rose-200 text-rose-950"
+                        : "bg-emerald-50/90 border-emerald-200 text-emerald-950"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="text-xs font-bold flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-current" />
+                        <span>Target Tiba: {resultData.route.target_arrival_time}</span>
+                      </span>
+                      <span
+                        className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${
+                          resultData.route.arrival_status === "berisiko_terlambat"
+                            ? "bg-rose-200/80 text-rose-800 border-rose-300"
+                            : "bg-emerald-200/80 text-emerald-800 border-emerald-300"
+                        }`}
+                      >
+                        {resultData.route.arrival_status === "berisiko_terlambat" ? "Berisiko Terlambat" : "Tepat Waktu"}
+                      </span>
+                    </div>
+
+                    {resultData.route.arrival_status === "berisiko_terlambat" ? (
+                      <div className="text-[11px] leading-relaxed text-rose-800">
+                        Perkiraan tiba <strong className="text-rose-950">{resultData.route.eta}</strong> (terlambat ±{resultData.route.delay_risk_min || 0} menit).{" "}
+                        {resultData.route.latest_departure_time && (
+                          <span>
+                            Saran jam berangkat paling lambat pukul <strong className="underline text-rose-950">{resultData.route.latest_departure_time}</strong>.
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-[11px] leading-relaxed text-emerald-800">
+                        Perjalanan diprediksi tiba pukul <strong className="text-emerald-950">{resultData.route.eta}</strong>, tepat waktu sebelum target Anda.
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between py-1.5 border-b border-slate-100">
                     <span className="text-slate-500">Titik awal:</span>
@@ -703,13 +775,46 @@ function HomeContent() {
                     <strong className="text-slate-900 text-right">{resultData.entities?.destination || "-"}</strong>
                   </div>
                   <div className="flex justify-between py-1.5 border-b border-slate-100">
-                    <span className="text-slate-500">Jarak:</span>
+                    <span className="text-slate-500">Jarak tempuh:</span>
                     <strong className="text-sky-600 font-extrabold">{resultData.route.distance_km} km</strong>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-100">
-                    <span className="text-slate-500">Perkiraan waktu:</span>
-                    <strong className="text-slate-900">~{resultData.route.duration_min} menit</strong>
+
+                  {/* Durasi Tempuh Aktual & Keterlambatan Macet */}
+                  <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+                    <span className="text-slate-500">Estimasi waktu tempuh:</span>
+                    <div className="text-right flex items-center gap-1.5">
+                      <strong className="text-slate-900 font-extrabold text-sm">
+                        ~{resultData.route.duration_min} menit
+                      </strong>
+                      {typeof resultData.route.traffic_delay_min === "number" && resultData.route.traffic_delay_min > 0 ? (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+                          +{resultData.route.traffic_delay_min} mnt macet
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          Lancar
+                        </span>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Jadwal Tempuh & ETA Real-Time */}
+                  {resultData.route.departure_time && resultData.route.eta && (
+                    <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-sky-50 border border-sky-100 my-1">
+                      <div className="text-slate-600 text-[11px] font-semibold flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-sky-600" />
+                        <span>Jadwal rute:</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="text-slate-600">{resultData.route.departure_time}</span>
+                        <span className="mx-1.5 text-slate-400">➔</span>
+                        <strong className="text-sky-700 font-extrabold text-sm">
+                          ETA {resultData.route.eta}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-between py-1.5">
                     <span className="text-slate-500">Kendaraan:</span>
                     <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200 capitalize">
@@ -727,18 +832,29 @@ function HomeContent() {
                ======================================================== */}
           <div className="lg:col-span-7 flex flex-col gap-4">
 
-            {/* FR-04: Informasi Cuaca 3 Titik Spesifik dengan WAKTU ACUAN */}
+            {/* FR-04: Informasi Cuaca 3 Titik Spesifik dengan WAKTU ACUAN & LINTASAN DINAMIS */}
             {resultData && resultData.weather && (
               <div className="space-y-3">
-                <h2 className="text-sm font-semibold text-slate-800">Cuaca sepanjang perjalanan</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-slate-800">Cuaca sepanjang perjalanan</h2>
+                  {resultData.route?.departure_time && (
+                    <span className="text-[11px] font-medium text-slate-500">
+                      Acuan: {resultData.route.departure_time}
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fadeIn">
                 {/* Titik Awal */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-emerald-500">
-                  <div className="mb-1">
+                  <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider">
                       Titik Awal
                     </span>
-
+                    {resultData.weather.origin.reference_time && (
+                      <span className="text-[10px] font-bold text-slate-400">
+                        {resultData.weather.origin.reference_time}
+                      </span>
+                    )}
                   </div>
                   <div className="font-bold text-slate-900 text-xs truncate">
                     {resultData.entities?.origin || resultData.weather.origin.name || "Titik Keberangkatan"}
@@ -755,11 +871,15 @@ function HomeContent() {
 
                 {/* Titik Tengah */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-amber-500">
-                  <div className="mb-1">
+                  <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-wider">
                       Titik Tengah
                     </span>
-
+                    {resultData.weather.midpoint.reference_time && (
+                      <span className="text-[10px] font-bold text-amber-600">
+                        {resultData.weather.midpoint.reference_time}
+                      </span>
+                    )}
                   </div>
                   <div className="font-bold text-slate-900 text-xs truncate">
                     {resultData.weather.midpoint.name || "Sampling Jalur Tengah"}
@@ -776,11 +896,15 @@ function HomeContent() {
 
                 {/* Titik Akhir */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-rose-500">
-                  <div className="mb-1">
+                  <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-extrabold text-rose-600 uppercase tracking-wider">
                       Titik Akhir
                     </span>
-
+                    {resultData.weather.destination.reference_time && (
+                      <span className="text-[10px] font-bold text-rose-600">
+                        {resultData.weather.destination.reference_time}
+                      </span>
+                    )}
                   </div>
                   <div className="font-bold text-slate-900 text-xs truncate">
                     {resultData.entities?.destination || resultData.weather.destination.name || "Titik Kedatangan"}

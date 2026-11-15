@@ -1,37 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
+import { processRouteRequestSchema } from "@/lib/schemas";
 import { extractEntitiesWithGroq, generateSafetyAdviceWithGroq } from "@/lib/groq";
 import { geocode, getRoute } from "@/lib/map";
 import { sampleThreePoints, analyzeWeatherRisk, buildSafetyAdvice } from "@/lib/weather";
-import { calculatePitstop, evaluateZeroTilang } from "@/lib/safety-rules";
+import { calculatePitstop, evaluateZeroTilang, evaluateArrivalTime } from "@/lib/safety-rules";
+import { saveSearchHistory } from "@/lib/history";
 import { supabase } from "@/lib/supabase";
 import { getSessionUser } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const userQuery = (body.query || "").trim();
-    const overrideVehicle = body.vehicle;
-    const userPlate = body.plate === "Ganjil" ? "Ganjil" : "Genap";
+    const rawBody = await req.json();
 
-    if (!userQuery) {
-      return NextResponse.json(
-        { success: false, message: "Permintaan rute tidak boleh kosong." },
-        { status: 400 }
-      );
+    // Validasi Zod untuk request body
+    const parseResult = processRouteRequestSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      const errorMsg = parseResult.error.issues[0]?.message || "Permintaan rute tidak valid.";
+      return NextResponse.json({ success: false, message: errorMsg }, { status: 400 });
     }
 
-    if (userQuery.length > 300) {
-      return NextResponse.json(
-        { success: false, message: "Teks instruksi perjalanan maksimal 300 karakter." },
-        { status: 400 }
-      );
-    }
+    const { query: userQuery, vehicle: overrideVehicle, plate, userId: bodyUserId } = parseResult.data;
+    const userPlate = plate === "Ganjil" ? "Ganjil" : "Genap";
 
-    // 1. Ekstraksi NLP dengan Groq AI LPU
+    // 1. Ekstraksi NLP dengan Groq AI LPU (Termasuk Target Jam Tiba)
     const nlpResult = await extractEntitiesWithGroq(userQuery);
     const originName = nlpResult.origin;
     const destName = nlpResult.destination;
     const vehicle = overrideVehicle || nlpResult.vehicle || "motor";
+    const targetArrivalTime = nlpResult.target_arrival_time || null;
 
     if (!originName || !destName) {
       const missing: string[] = [];
@@ -65,7 +61,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Routing OSRM
+    // 3. Routing Engine (TomTom Live Traffic dengan OSRM Fallback)
     const routeData = await getRoute(originGeo, destGeo, vehicle);
     if (!routeData) {
       return NextResponse.json(
@@ -77,14 +73,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4. Sampling Cuaca 3 Titik
+    // 4. Kalkulasi ETA & Evaluasi Ketepatan Waktu Tiba
+    const arrivalEval = evaluateArrivalTime(routeData.duration_min, targetArrivalTime);
+    routeData.departure_time = arrivalEval.departure_time;
+    routeData.eta = arrivalEval.eta;
+    routeData.target_arrival_time = arrivalEval.target_arrival_time;
+    routeData.arrival_status = arrivalEval.arrival_status;
+    routeData.delay_risk_min = arrivalEval.delay_risk_min;
+    routeData.latest_departure_time = arrivalEval.latest_departure_time;
+
+    // 5. Sampling Cuaca 3 Titik dengan Timeline Lintasan Dinamis
     const weather3Points = await sampleThreePoints(
       routeData.origin,
       routeData.midpoint,
-      routeData.destination
+      routeData.destination,
+      routeData.duration_min
     );
 
-    // 5. Decision Engine & Groq AI Safety Advice
+    // 6. Decision Engine & Groq AI Safety Advice
     const riskAnalysis = analyzeWeatherRisk(weather3Points, vehicle);
     const baseAdvice = buildSafetyAdvice(riskAnalysis, vehicle, routeData.distance_km);
     const finalAdvice = await generateSafetyAdviceWithGroq(
@@ -92,10 +98,22 @@ export async function POST(req: NextRequest) {
       destName,
       vehicle,
       weather3Points,
-      baseAdvice
+      baseAdvice,
+      {
+        duration_min: routeData.duration_min,
+        normal_duration_min: routeData.normal_duration_min,
+        traffic_delay_min: routeData.traffic_delay_min,
+        departure_time: routeData.departure_time,
+        eta: routeData.eta,
+        target_arrival_time: routeData.target_arrival_time,
+        arrival_status: routeData.arrival_status,
+        delay_risk_min: routeData.delay_risk_min,
+        latest_departure_time: routeData.latest_departure_time,
+        routing_engine: routeData.routing_engine,
+      }
     );
 
-    // 5.1 Pitstop Jas Hujan Predictor & Zero-Tilang Guard
+    // 7. Pitstop Jas Hujan Predictor & Zero-Tilang Guard
     const pitstopRecommendation = calculatePitstop(
       vehicle,
       routeData.coordinates,
@@ -111,12 +129,11 @@ export async function POST(req: NextRequest) {
       userPlate
     );
 
-    // 6. Simpan ke Riwayat di Supabase
+    // 8. Simpan ke Riwayat di Supabase (Kompatibel dengan data lama)
     let historyId: number | null = null;
     const session = getSessionUser();
-    let targetUserId = session?.userId || body.userId;
+    let targetUserId = session?.userId || bodyUserId;
 
-    // Jika tidak ada session userId, ambil user ID terakhir dari database Supabase
     if (!targetUserId) {
       try {
         const { data: latestUser } = await supabase
@@ -132,34 +149,28 @@ export async function POST(req: NextRequest) {
     }
 
     if (targetUserId) {
-      try {
-        const { data: insertedHistory, error: insErr } = await supabase
-          .from("search_histories")
-          .insert({
-            user_id: targetUserId,
-            raw_query: userQuery,
-            origin: originName,
-            destination: destName,
-            vehicle: vehicle,
-            route_summary: JSON.stringify({
-              distance_km: routeData.distance_km,
-              duration_min: routeData.duration_min,
-            }),
-            weather_summary: JSON.stringify(weather3Points),
-            ai_advice: finalAdvice,
-          })
-          .select("id")
-          .maybeSingle();
-
-        if (insErr) {
-          console.error("[RouteAPI] Supabase insert error:", insErr);
-        } else if (insertedHistory) {
-          historyId = insertedHistory.id;
-          console.log("[RouteAPI] Riwayat berhasil disimpan ke Supabase dengan ID:", historyId);
-        }
-      } catch (err) {
-        console.warn("[RouteAPI] Gagal menyimpan riwayat:", err);
-      }
+      historyId = await saveSearchHistory({
+        userId: targetUserId,
+        rawQuery: userQuery,
+        origin: originName,
+        destination: destName,
+        vehicle,
+        routeSummary: {
+          distance_km: routeData.distance_km,
+          duration_min: routeData.duration_min,
+          normal_duration_min: routeData.normal_duration_min,
+          traffic_delay_min: routeData.traffic_delay_min,
+          departure_time: routeData.departure_time,
+          eta: routeData.eta,
+          target_arrival_time: routeData.target_arrival_time,
+          arrival_status: routeData.arrival_status,
+          delay_risk_min: routeData.delay_risk_min,
+          latest_departure_time: routeData.latest_departure_time,
+          routing_engine: routeData.routing_engine,
+        },
+        weatherSummary: weather3Points,
+        aiAdvice: finalAdvice,
+      });
     }
 
     return NextResponse.json(
@@ -171,8 +182,10 @@ export async function POST(req: NextRequest) {
           destination: destName,
           vehicle,
           plate: userPlate,
+          target_arrival_time: targetArrivalTime,
         },
         route: routeData,
+        arrival_evaluation: arrivalEval,
         weather: weather3Points,
         risk: riskAnalysis,
         advice: finalAdvice,
@@ -190,4 +203,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

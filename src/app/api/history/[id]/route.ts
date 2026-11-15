@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { deleteSearchHistory } from "@/lib/history";
 import { getSessionUser } from "@/lib/auth";
 
 export async function DELETE(
@@ -9,7 +9,7 @@ export async function DELETE(
   try {
     const session = getSessionUser();
     const userId = session?.userId || 1;
-    const historyId = parseInt(params.id);
+    const historyId = parseInt(params.id, 10);
 
     if (isNaN(historyId)) {
       return NextResponse.json(
@@ -18,14 +18,8 @@ export async function DELETE(
       );
     }
 
-    const { error } = await supabase
-      .from("search_histories")
-      .delete()
-      .eq("id", historyId)
-      .eq("user_id", userId);
-
-    if (error) {
-      console.error("[HistoryAPI] Delete error:", error);
+    const success = await deleteSearchHistory(historyId, userId);
+    if (!success) {
       return NextResponse.json(
         { success: false, message: "Gagal menghapus riwayat." },
         { status: 500 }
@@ -44,4 +38,3 @@ export async function DELETE(
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import { Groq } from "groq-sdk";
+import { ExtractedRouteEntities } from "./schemas";
 
 const groqApiKey = process.env.GROQ_API_KEY || "";
 const groqModel = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
@@ -12,14 +13,7 @@ if (groqApiKey && !groqApiKey.startsWith("your_")) {
   }
 }
 
-export interface ExtractedRouteEntities {
-  origin: string | null;
-  destination: string | null;
-  vehicle: "motor" | "mobil";
-  preferences: string[];
-  complete: boolean;
-  clarification_needed?: boolean;
-}
+export type { ExtractedRouteEntities };
 
 export function cleanLocationName(name: string): string {
   if (!name) return "";
@@ -32,33 +26,87 @@ export function cleanLocationName(name: string): string {
   );
   cleaned = cleaned.replace(/^(?:dari|ke|menuju|di|arah)\s+/gi, "");
 
-  // 2. Bersihkan kata sambung transisi tujuan di akhir (mau, ingin, hendak, tujuannya, dll)
+  // 2. Bersihkan target waktu atau jam yang menempel di ujung nama tempat
+  cleaned = cleaned.replace(
+    /\s+\b(?:harus\s+sampai|sebelum|paling\s+lambat|sampai\s+jam|target\s+jam|jam|pukul)\b.*$/gi,
+    ""
+  );
+
+  // 3. Bersihkan kata sambung transisi tujuan di akhir (mau, ingin, hendak, tujuannya, dll)
   cleaned = cleaned.replace(
     /\s+\b(?:mau|ingin|hendak|tujuan|tujuannya|otw|rencana|pengen|arah|terus|lalu|sampai)\b.*$/gi,
     ""
   );
 
-  // 3. Bersihkan kata moda transportasi dan preferensi
+  // 4. Bersihkan kata moda transportasi dan preferensi
   cleaned = cleaned.replace(
     /\b(?:naik|pake|pakai|menggunakan|bawa|dengan)\s+(?:sepeda\s+motor|motor|mobil|kendaraan)\b.*/gi,
     ""
   );
   cleaned = cleaned.replace(/\b(?:jangan\s+lewat|hindari|lewat|santai|cepat|buru-buru)\b.*/gi, "");
 
-  // 4. Bersihkan kata pelengkap percakapan ("deket rumah", "dekat rumah")
+  // 5. Bersihkan kata pelengkap percakapan ("deket rumah", "dekat rumah")
   cleaned = cleaned.replace(
     /\s+\b(?:deket\s+rumah|dekat\s+rumah|sebelah\s+rumah|depan\s+rumah)\b/gi,
     ""
   );
 
-  // 5. Jika setelah dibersihkan hanya menyisakan kata intent/sambung tanpa nama tempat nyata
+  // 6. Jika setelah dibersihkan hanya menyisakan kata intent/sambung tanpa nama tempat nyata
   if (/^(?:mau|ingin|hendak|tujuan|otw|rencana|pengen|start|posisi|arah|dari|ke)$/i.test(cleaned)) {
     return "";
   }
 
-  // 6. Bersihkan tanda baca dan spasi di ujung
+  // 7. Bersihkan tanda baca dan spasi di ujung
   cleaned = cleaned.replace(/[,.\-_]+$/, "").trim();
   return cleaned;
+}
+
+export function extractTargetTimeHeuristic(query: string): string | null {
+  const text = query.toLowerCase();
+
+  // Pola "setengah [jam] [siang/sore/malam/pagi]"
+  const matchSetengah = text.match(/setengah\s+(\d{1,2})(?:\s+(pagi|siang|sore|malam))?/i);
+  if (matchSetengah) {
+    let hour = parseInt(matchSetengah[1], 10);
+    const period = matchSetengah[2]?.toLowerCase();
+    // "setengah 2 siang" = 13:30, "setengah 8 pagi" = 07:30
+    hour = hour - 1;
+    if (period === "siang" && hour < 12) hour += 12;
+    if (period === "sore" && hour < 12) hour += 12;
+    if (period === "malam" && hour < 12) hour += 12;
+    if (hour < 0) hour = 23;
+    return `${String(hour).padStart(2, "0")}:30`;
+  }
+
+  // Pola "jam/pukul HH:mm" atau "HH.mm"
+  const matchTimeCol = text.match(/(?:jam|pukul|sebelum|sampai)?\s*(\d{1,2})[:.](\d{2})(?:\s*(pagi|siang|sore|malam|wib))?/i);
+  if (matchTimeCol) {
+    let hour = parseInt(matchTimeCol[1], 10);
+    const minute = matchTimeCol[2];
+    const period = matchTimeCol[3]?.toLowerCase();
+
+    if ((period === "siang" || period === "sore" || period === "malam") && hour < 12) {
+      hour += 12;
+    }
+    if (hour >= 0 && hour <= 23 && parseInt(minute, 10) <= 59) {
+      return `${String(hour).padStart(2, "0")}:${minute}`;
+    }
+  }
+
+  // Pola "jam HH [pagi/siang/sore/malam]"
+  const matchJam = text.match(/(?:jam|pukul)\s+(\d{1,2})(?:\s+(pagi|siang|sore|malam))?/i);
+  if (matchJam) {
+    let hour = parseInt(matchJam[1], 10);
+    const period = matchJam[2]?.toLowerCase();
+    if ((period === "siang" || period === "sore" || period === "malam") && hour < 12) {
+      hour += 12;
+    }
+    if (hour >= 0 && hour <= 23) {
+      return `${String(hour).padStart(2, "0")}:00`;
+    }
+  }
+
+  return null;
 }
 
 export function heuristicExtract(query: string): ExtractedRouteEntities {
@@ -72,6 +120,8 @@ export function heuristicExtract(query: string): ExtractedRouteEntities {
   } else if (text.includes("motor") || text.includes("sepeda motor")) {
     vehicle = "motor";
   }
+
+  const targetArrivalTime = extractTargetTimeHeuristic(query);
 
   const separatorPattern =
     /\s+(?:mau\s+ke|ingin\s+ke|hendak\s+ke|tujuan\s+ke|otw\s+ke|rencana\s+ke|pengen\s+ke|tujuannya\s+ke|menuju\s+ke|arah\s+ke|ke|menuju|sampai|arah)\s+/i;
@@ -109,6 +159,7 @@ export function heuristicExtract(query: string): ExtractedRouteEntities {
     vehicle,
     preferences: [],
     complete,
+    target_arrival_time: targetArrivalTime,
     clarification_needed: !complete,
   };
 }
@@ -121,26 +172,34 @@ export async function extractEntitiesWithGroq(query: string): Promise<ExtractedR
       vehicle: "motor",
       preferences: [],
       complete: false,
+      target_arrival_time: null,
       clarification_needed: true,
     };
   }
 
   if (groqClient) {
     const prompt = `
-Ekstraksi informasi rute perjalanan dari teks pengguna berikut.
+Ekstraksi informasi rute perjalanan dan target jam tiba dari teks pengguna berikut.
 Format keluaran HARUS berupa JSON murni dengan format persis:
 {
     "origin": string atau null jika tidak disebutkan,
     "destination": string atau null jika tidak disebutkan,
     "vehicle": "motor" atau "mobil" (default "motor"),
     "preferences": list of string atau [],
+    "target_arrival_time": string format "HH:mm" (24-jam, contoh "08:00", "13:30", "17:00") atau null jika tidak disebutkan,
     "complete": boolean (true jika origin dan destination ada, false jika salah satu hilang)
 }
 
-Aturan Ekstraksi Lokasi:
-- "origin" dan "destination" HANYA berisi nama tempat/gedung/stasiun/taman murni.
-- BERSIHKAN dan JANGAN sertakan kata sambung/pengantar seperti 'mau', 'ke', 'dari', 'hendak', 'arah', 'titik awal', 'titik keberangkatan', 'deket rumah'.
-- Contoh: "titik awal dari stasiun kalibata mau ke ragunan zoo" -> origin: "stasiun kalibata", destination: "ragunan zoo".
+Aturan Ekstraksi:
+1. "origin" dan "destination" HANYA berisi nama tempat/gedung/stasiun/taman murni.
+2. BERSIHKAN dan JANGAN sertakan kata sambung/pengantar seperti 'mau', 'ke', 'dari', 'hendak', 'arah', 'titik awal', 'titik keberangkatan', 'deket rumah'.
+3. JANGAN masukkan kata target jam tiba ke dalam nama tempat ("origin" atau "destination").
+4. "target_arrival_time" adalah waktu target tiba jika pengguna menyebutkannya:
+   - "harus sampai jam 8 pagi" -> "08:00"
+   - "sebelum jam 9 malam" -> "21:00"
+   - "sebelum setengah 2 siang" -> "13:30"
+   - "paling lambat 08.45" -> "08:45"
+   - jika tidak menyebutkan jam sampai/tiba -> null
 
 Teks Pengguna: "${query}"
 `;
@@ -151,7 +210,7 @@ Teks Pengguna: "${query}"
           {
             role: "system",
             content:
-              "Anda adalah asisten AI ekstraksi rute perjalanan dan navigasi komuter. Selalu jawab dalam format JSON murni.",
+              "Anda adalah asisten AI ekstraksi rute navigasi dan estimasi waktu komuter. Selalu jawab dalam format JSON murni.",
           },
           { role: "user", content: prompt },
         ],
@@ -165,6 +224,21 @@ Teks Pengguna: "${query}"
 
       if (data.origin) data.origin = cleanLocationName(data.origin);
       if (data.destination) data.destination = cleanLocationName(data.destination);
+
+      // Validasi format target_arrival_time HH:mm
+      let targetTime: string | null = null;
+      if (typeof data.target_arrival_time === "string") {
+        const timeMatch = data.target_arrival_time.trim().match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+        if (timeMatch) {
+          targetTime = `${timeMatch[1]}:${timeMatch[2]}`;
+        }
+      }
+      if (!targetTime) {
+        // Fallback heuristik waktu jika LLM mengabaikannya
+        targetTime = extractTargetTimeHeuristic(query);
+      }
+
+      data.target_arrival_time = targetTime;
       data.complete = Boolean(data.origin && data.destination);
       return data as ExtractedRouteEntities;
     } catch (err) {
@@ -175,14 +249,60 @@ Teks Pengguna: "${query}"
   return heuristicExtract(query);
 }
 
+export interface TrafficAdviceContext {
+  duration_min: number;
+  normal_duration_min: number;
+  traffic_delay_min: number;
+  departure_time?: string;
+  eta?: string;
+  target_arrival_time?: string | null;
+  arrival_status?: "tepat_waktu" | "berisiko_terlambat" | null;
+  delay_risk_min?: number;
+  latest_departure_time?: string | null;
+  routing_engine?: "tomtom" | "osrm";
+}
+
 export async function generateSafetyAdviceWithGroq(
   origin: string,
   destination: string,
   vehicle: string,
   weatherData: any,
-  baseAdvice: string
+  baseAdvice: string,
+  trafficInfo?: TrafficAdviceContext
 ): Promise<string> {
   if (!groqClient) return baseAdvice;
+
+  let trafficContext = "";
+  if (trafficInfo) {
+    const trafficParts: string[] = [];
+    trafficParts.push(`- Durasi Perjalanan Aktual: ~${trafficInfo.duration_min} menit`);
+    if (trafficInfo.traffic_delay_min > 0) {
+      trafficParts.push(
+        `- Keterlambatan Macet: Ada perlambatan macet +${trafficInfo.traffic_delay_min} menit (waktu normal: ${trafficInfo.normal_duration_min} menit).`
+      );
+    } else {
+      trafficParts.push("- Lalu Lintas: Arus lalu lintas relatif lancar tanpa tundaan berarti.");
+    }
+
+    if (trafficInfo.departure_time && trafficInfo.eta) {
+      trafficParts.push(
+        `- Estimasi Waktu: Berangkat ${trafficInfo.departure_time}, perkiraan sampai ${trafficInfo.eta}.`
+      );
+    }
+
+    if (trafficInfo.target_arrival_time) {
+      if (trafficInfo.arrival_status === "berisiko_terlambat") {
+        trafficParts.push(
+          `- Target Tiba: User ingin sampai pukul ${trafficInfo.target_arrival_time}, namun berisiko terlambat ±${trafficInfo.delay_risk_min || 0} menit. Saran berangkat: ${trafficInfo.latest_departure_time || "segera"}.`
+        );
+      } else if (trafficInfo.arrival_status === "tepat_waktu") {
+        trafficParts.push(
+          `- Target Tiba: Target pukul ${trafficInfo.target_arrival_time} diprediksi TEPAT WAKTU.`
+        );
+      }
+    }
+    trafficContext = `\nInformasi Kemacetan & Waktu Tempuh:\n${trafficParts.join("\n")}`;
+  }
 
   const prompt = `
 Anda adalah asisten SmartRoute AI. Buat 2-3 kalimat saran perjalanan yang ringkas, bersahabat, dan edukatif berdasarkan data berikut:
@@ -190,8 +310,13 @@ Anda adalah asisten SmartRoute AI. Buat 2-3 kalimat saran perjalanan yang ringka
 - Kendaraan: ${vehicle}
 - Status Cuaca Titik Awal, Tengah, dan Akhir: ${JSON.stringify(weatherData)}
 - Peringatan Utama: ${baseAdvice}
+${trafficContext}
 
-Saran harus realistis, tidak menjamin keselamatan mutlak, dan mengingatkan kepatuhan lalu lintas.
+Aturan Penulisan Saran:
+1. Hubungkan kondisi cuaca dengan kondisi lalu lintas dan estimasi waktu jika ada kemacetan atau hujan.
+2. Jika ada risiko terlambat dari target jam tiba, ingatkan pengguna secara sopan untuk segera berangkat atau berhati-hati agar tidak terburu-buru.
+3. Tetap prioritaskan keselamatan berkendara (patuhi rambu, gunakan jas hujan jika hujan, jangan berteduh sembarangan).
+4. JANGAN mengarang data angka waktu atau rute yang tidak ada dalam konteks di atas.
 `;
 
   try {
@@ -200,7 +325,7 @@ Saran harus realistis, tidak menjamin keselamatan mutlak, dan mengingatkan kepat
         {
           role: "system",
           content:
-            "Anda adalah asisten SmartRoute AI yang ramah, ringkas, dan fokus pada keselamatan berkendara di jalan raya.",
+            "Anda adalah asisten SmartRoute AI yang ramah, ringkas, dan fokus pada keselamatan berkendara di jalan raya serta manajemen waktu komuter.",
         },
         { role: "user", content: prompt },
       ],
@@ -213,4 +338,3 @@ Saran harus realistis, tidak menjamin keselamatan mutlak, dan mengingatkan kepat
     return baseAdvice;
   }
 }
-

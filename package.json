@@ -18,7 +18,8 @@
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",
-    "resend": "^6.37.0"
+    "resend": "^6.37.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
