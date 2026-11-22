@@ -228,3 +228,45 @@ export async function getRoute(
 
   return null;
 }
+
+export async function reverseGeocode(lat: number, lon: number): Promise<string> {
+  // Menggunakan zoom=18 untuk akurasi maksimal hingga tingkat bangunan & nomor jalan
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "SmartRouteAI-Gunadarma/1.0",
+      "Accept-Language": "id",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Gagal mengambil nama lokasi dari layanan peta.");
+  }
+
+  const data = await response.json();
+  if (!data || data.error) {
+    throw new Error("Alamat untuk titik koordinat ini tidak ditemukan.");
+  }
+
+  const addr = data.address || {};
+
+  // Gabungkan nama jalan dan nomor bangunan jika tersedia
+  const streetWithNumber = [addr.road, addr.house_number]
+    .filter(Boolean)
+    .join(" No. ");
+
+  // Susun detail alamat dari titik paling spesifik hingga kota/kabupaten
+  const detailedParts = [
+    addr.amenity || addr.building || addr.shop || addr.tourism, // Nama gedung/kampus/tempat
+    streetWithNumber || addr.neighbourhood || addr.hamlet,      // Jalan + nomor atau komplek
+    addr.village || addr.suburb || addr.quarter,                // Kelurahan / Desa
+    addr.city_district || addr.subdistrict,                     // Kecamatan
+    addr.city || addr.town || addr.county,                      // Kota / Kabupaten
+  ].filter(Boolean);
+
+  // Hilangkan nama ganda jika kelurahan dan kecamatan bernama sama
+  const uniqueParts = Array.from(new Set(detailedParts));
+
+  return uniqueParts.length > 0 ? uniqueParts.join(", ") : data.display_name;
+}
