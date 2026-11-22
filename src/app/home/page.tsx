@@ -57,6 +57,59 @@ function HomeContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{ type: string; text: string } | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  const handleDetectLocation = () => {
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+      setLocationError("Browser tidak mendukung deteksi lokasi GPS.");
+      return;
+    }
+
+    setIsLocating(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(
+            `/api/reverse-geocode?lat=${latitude}&lon=${longitude}`
+          );
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.error || "Gagal mendeteksi nama lokasi.");
+          }
+
+          // Isi otomatis ke kolom input teks (ganti setQuery jika nama state di file berbeda)
+          setQuery((prev: string) => {
+            const trimmed = prev.trim();
+            if (!trimmed) {
+              return `Dari ${data.locationName} ke `;
+            }
+            return `Dari ${data.locationName}, ${trimmed}`;
+          });
+        } catch (err) {
+          setLocationError(
+            err instanceof Error ? err.message : "Gagal memuat nama lokasi."
+          );
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationError("Izin akses lokasi ditolak. Aktifkan izin lokasi di browser.");
+        } else {
+          setLocationError("Tidak dapat mengambil koordinat GPS saat ini.");
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   // Proteksi halaman Navigator: harus login terlebih dahulu
   useEffect(() => {
@@ -383,6 +436,15 @@ function HomeContent() {
                     >
                       <Mic className="w-4 h-4" />
                     </button>
+                    <button
+                      type="button"
+                      onClick={handleDetectLocation}
+                      disabled={isLocating}
+                      title="Gunakan lokasi saya sekarang"
+                      className="px-3 py-2 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition"
+                    >
+                      {isLocating ? "Mendeteksi..." : "📍 Lokasi Saya"}
+                    </button>
                   </div>
                   {isRecording && (
                     <span className="text-[11px] text-rose-600 font-semibold mt-1.5 inline-flex items-center gap-1.5 animate-fadeIn">
@@ -445,6 +507,9 @@ function HomeContent() {
               </form>
 
               {/* Status Alert Error (NFR & AC 3) */}
+              {locationError && (
+                <p className="mt-2 text-xs text-red-600">{locationError}</p>
+              )}
               {alertMessage && (
                 <div
                   className={`mt-4 p-3 rounded-xl text-xs font-medium border flex items-start gap-2.5 ${
