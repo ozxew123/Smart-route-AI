@@ -26,6 +26,7 @@ import {
   Sparkles
 } from "lucide-react";
 import UserNavDropdown from "@/components/UserNavDropdown";
+import FavoriteLocations from "@/components/FavoriteLocations";
 
 // Import MapComponent dynamically without SSR (FR-02)
 const MapComponent = dynamic(() => import("@/components/MapComponent"), {
@@ -418,6 +419,19 @@ function HomeContent() {
                KOLOM KIRI: INPUT PINTAR, ASISTEN AI, KLARIFIKASI, RUTE
                ======================================================== */}
           <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5">
+
+            {/* ⭐ LOKASI FAVORIT — Chip shortcut ke form input */}
+            <FavoriteLocations
+              onSelect={(address) => setQuery((prev) => {
+                const trimmed = prev.trim();
+                if (!trimmed) return `Dari ${address} ke `;
+                // Jika query sudah ada, tambahkan sebagai tujuan
+                if (trimmed.toLowerCase().startsWith("dari ") && !trimmed.toLowerCase().includes(" ke ")) {
+                  return `${trimmed} ke ${address}`;
+                }
+                return `Dari ${address} ke `;
+              })}
+            />
 
             {/* FR-01: Panel Input Pintar (Teks & Suara) */}
             <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
