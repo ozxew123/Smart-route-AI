@@ -59,8 +59,11 @@ function HomeContent() {
   const [alertMessage, setAlertMessage] = useState<{ type: string; text: string } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [hasDetectedLocation, setHasDetectedLocation] = useState(false);
 
   const handleDetectLocation = () => {
+    if (hasDetectedLocation || isLocating) return;
+
     setLocationError(null);
 
     if (!navigator.geolocation) {
@@ -83,14 +86,31 @@ function HomeContent() {
             throw new Error(data.error || "Gagal mendeteksi nama lokasi.");
           }
 
-          // Isi otomatis ke kolom input teks (ganti setQuery jika nama state di file berbeda)
+          // Format teks cerdas: cegah duplikasi 'Dari ... Dari ...'
           setQuery((prev: string) => {
             const trimmed = prev.trim();
             if (!trimmed) {
               return `Dari ${data.locationName} ke `;
             }
-            return `Dari ${data.locationName}, ${trimmed}`;
+
+            // Jika sebelumnya sudah ada 'ke [tujuan]'
+            const keMatch = trimmed.match(/(?:ke\s+)(.+)$/i);
+            if (keMatch && keMatch[1]) {
+              const dest = keMatch[1].trim();
+              return `Dari ${data.locationName} ke ${dest}`;
+            }
+
+            // Jika user sebelumnya hanya mengetik tujuan
+            const cleanOrigin = trimmed.replace(/^dari\s+/i, "").trim();
+            if (cleanOrigin) {
+              return `Dari ${data.locationName} ke ${cleanOrigin}`;
+            }
+
+            return `Dari ${data.locationName} ke `;
           });
+
+          // Tandai bahwa lokasi GPS sudah terpasang (cukup sekali klik)
+          setHasDetectedLocation(true);
         } catch (err) {
           setLocationError(
             err instanceof Error ? err.message : "Gagal memuat nama lokasi."
@@ -344,6 +364,7 @@ function HomeContent() {
 
   // Preset prompts
   const applyPreset = (presetText: string, presetVehicle: "motor" | "mobil" = "motor") => {
+    setHasDetectedLocation(false);
     setQuery(presetText);
     setVehicle(presetVehicle);
     handleExecuteRoute(presetText, presetVehicle);
@@ -413,13 +434,21 @@ function HomeContent() {
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
                 <div>
-                  <label htmlFor="route-query" className="block text-xs font-semibold text-slate-700 mb-1.5">Lokasi awal dan tujuan</label>
+                  <label htmlFor="route-query" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Lokasi awal dan tujuan
+                  </label>
+
                   <div className="relative">
                     <textarea
                       id="route-query"
                       rows={2}
                       value={query}
-                      onChange={(e) => setQuery(e.target.value)}
+                      onChange={(e) => {
+                        setQuery(e.target.value);
+                        if (!e.target.value.trim()) {
+                          setHasDetectedLocation(false);
+                        }
+                      }}
                       placeholder="Contoh: Margonda, Depok ke Kampus F4"
                       required
                       className="w-full text-base sm:text-sm font-medium bg-slate-50/80 border border-slate-200 rounded-2xl p-3.5 pr-12 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all resize-none"
@@ -436,16 +465,52 @@ function HomeContent() {
                     >
                       <Mic className="w-4 h-4" />
                     </button>
+                  </div>
+
+                  <div className="mt-2">
                     <button
                       type="button"
                       onClick={handleDetectLocation}
-                      disabled={isLocating}
-                      title="Gunakan lokasi saya sekarang"
-                      className="px-3 py-2 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition"
+                      disabled={isLocating || hasDetectedLocation}
+                      title={
+                        hasDetectedLocation
+                          ? "Lokasi Anda sudah berhasil dimasukkan"
+                          : "Gunakan lokasi GPS saya saat ini sebagai titik awal"
+                      }
+                      className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border transition-all ${
+                        hasDetectedLocation
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-300 cursor-not-allowed opacity-90 shadow-none"
+                          : isLocating
+                          ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
+                          : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 active:scale-95 shadow-xs"
+                      }`}
                     >
-                      {isLocating ? "Mendeteksi..." : "📍 Lokasi Saya"}
+                      {isLocating ? (
+                        <>
+                          <RotateCw className="w-3.5 h-3.5 animate-spin text-sky-600" />
+                          <span>Mendeteksi...</span>
+                        </>
+                      ) : hasDetectedLocation ? (
+                        <>
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Lokasi Terpasang</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>📍</span>
+                          <span>Lokasi Saya</span>
+                        </>
+                      )}
                     </button>
                   </div>
+
+                  {locationError && (
+                    <div className="mt-2 p-2.5 rounded-xl text-xs font-medium bg-rose-50 text-rose-800 border border-rose-200 flex items-start gap-2 animate-fadeIn">
+                      <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+                      <span>{locationError}</span>
+                    </div>
+                  )}
+
                   {isRecording && (
                     <span className="text-[11px] text-rose-600 font-semibold mt-1.5 inline-flex items-center gap-1.5 animate-fadeIn">
                       <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
