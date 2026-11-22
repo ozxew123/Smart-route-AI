@@ -50,9 +50,9 @@ interface HistoryItem {
     routing_engine?: string;
   };
   weather_data?: {
-    origin?: { name?: string; temp?: number; description?: string };
-    midpoint?: { name?: string; temp?: number; description?: string };
-    destination?: { name?: string; temp?: number; description?: string };
+    origin?: { name?: string; temp?: number; temp_c?: number; condition?: string; description?: string; icon?: string };
+    midpoint?: { name?: string; temp?: number; temp_c?: number; condition?: string; description?: string; icon?: string };
+    destination?: { name?: string; temp?: number; temp_c?: number; condition?: string; description?: string; icon?: string };
   };
   ai_advice?: string;
 }
@@ -83,6 +83,9 @@ export default function HistoryPage() {
     fetchHistories();
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedDetail(null);
+      }
       if (e.key === "/" && document.activeElement?.tagName !== "INPUT") {
         e.preventDefault();
         const input = document.getElementById("searchHistoryInput");
@@ -346,15 +349,15 @@ export default function HistoryPage() {
                             {item.weather_data && (
                               <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                                 <span className="text-[11px] font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200 inline-flex items-center gap-1">
-                                  <span className="text-emerald-600 font-bold">Awal:</span> {item.weather_data.origin?.temp || "-"}°C
+                                  <span className="text-emerald-600 font-bold">Awal:</span> {item.weather_data.origin?.temp_c ?? item.weather_data.origin?.temp ?? "-"}°C
                                 </span>
                                 <ArrowRight className="w-3 h-3 text-slate-300" />
                                 <span className="text-[11px] font-semibold bg-amber-50 text-amber-800 px-2 py-0.5 rounded-md border border-amber-200 inline-flex items-center gap-1">
-                                  <span className="text-amber-600 font-bold">Tengah:</span> {item.weather_data.midpoint?.temp || "-"}°C ({item.weather_data.midpoint?.description || "Cerah"})
+                                  <span className="text-amber-600 font-bold">Tengah:</span> {item.weather_data.midpoint?.temp_c ?? item.weather_data.midpoint?.temp ?? "-"}°C ({item.weather_data.midpoint?.description || "Cerah"})
                                 </span>
                                 <ArrowRight className="w-3 h-3 text-slate-300" />
                                 <span className="text-[11px] font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200 inline-flex items-center gap-1">
-                                  <span className="text-rose-600 font-bold">Akhir:</span> {item.weather_data.destination?.temp || "-"}°C
+                                  <span className="text-rose-600 font-bold">Akhir:</span> {item.weather_data.destination?.temp_c ?? item.weather_data.destination?.temp ?? "-"}°C
                                 </span>
                               </div>
                             )}
@@ -473,15 +476,15 @@ export default function HistoryPage() {
                       {item.weather_data && (
                         <div className="flex items-center gap-1.5 flex-wrap text-[11px] pt-1">
                           <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
-                            <strong className="text-emerald-600">Awal:</strong> {item.weather_data.origin?.temp || "-"}°C
+                            <strong className="text-emerald-600">Awal:</strong> {item.weather_data.origin?.temp_c ?? item.weather_data.origin?.temp ?? "-"}°C
                           </span>
                           <ArrowRight className="w-3 h-3 text-slate-300" />
                           <span className="bg-amber-50 text-amber-800 px-2 py-0.5 rounded border border-amber-200">
-                            <strong className="text-amber-600">Tengah:</strong> {item.weather_data.midpoint?.temp || "-"}°C
+                            <strong className="text-amber-600">Tengah:</strong> {item.weather_data.midpoint?.temp_c ?? item.weather_data.midpoint?.temp ?? "-"}°C
                           </span>
                           <ArrowRight className="w-3 h-3 text-slate-300" />
                           <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
-                            <strong className="text-rose-600">Akhir:</strong> {item.weather_data.destination?.temp || "-"}°C
+                            <strong className="text-rose-600">Akhir:</strong> {item.weather_data.destination?.temp_c ?? item.weather_data.destination?.temp ?? "-"}°C
                           </span>
                         </div>
                       )}
@@ -541,22 +544,30 @@ export default function HistoryPage() {
 
       {/* Detail Modal */}
       {selectedDetail && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-fadeIn">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="font-bold text-slate-900 flex items-center gap-2">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedDetail(null);
+          }}
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fadeIn"
+        >
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] sm:max-h-[85vh] overflow-hidden my-auto">
+            {/* Modal Header (Fixed at top) */}
+            <div className="flex items-center justify-between p-4 sm:p-5 pb-3 border-b border-slate-100 flex-shrink-0 bg-white">
+              <h3 className="font-bold text-slate-900 flex items-center gap-2 text-sm sm:text-base">
                 <MapPin className="w-4 h-4 text-sky-600" />
                 Detail Riwayat Perjalanan
               </h3>
               <button
                 onClick={() => setSelectedDetail(null)}
                 className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition"
+                title="Tutup"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-4 my-4">
+            {/* Modal Body (Scrollable with smooth scrolling) */}
+            <div className="space-y-4 p-4 sm:p-5 py-4 overflow-y-auto flex-1 overscroll-contain">
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
                 <span className="font-semibold text-slate-500 block mb-1">Perintah Asli Pengguna:</span>
                 <p className="italic text-slate-800 font-medium">"{selectedDetail.raw_query || "-"}"</p>
@@ -618,18 +629,24 @@ export default function HistoryPage() {
                   <div className="grid grid-cols-3 gap-2 text-center text-xs">
                     <div className="p-2 rounded-lg bg-slate-50 border border-slate-200">
                       <div className="text-[10px] text-slate-500 font-bold">AWAL</div>
-                      <div className="font-extrabold text-slate-800">{selectedDetail.weather_data.origin?.temp}°C</div>
-                      <div className="text-[10px] text-slate-400 truncate">{selectedDetail.weather_data.origin?.description}</div>
+                      <div className="font-extrabold text-slate-800">
+                        {selectedDetail.weather_data.origin?.temp_c ?? selectedDetail.weather_data.origin?.temp ?? "-"}°C
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate capitalize">{selectedDetail.weather_data.origin?.description || "Cerah"}</div>
                     </div>
                     <div className="p-2 rounded-lg bg-amber-50 border border-amber-200">
                       <div className="text-[10px] text-amber-700 font-bold">TENGAH</div>
-                      <div className="font-extrabold text-amber-900">{selectedDetail.weather_data.midpoint?.temp}°C</div>
-                      <div className="text-[10px] text-amber-700 truncate">{selectedDetail.weather_data.midpoint?.description}</div>
+                      <div className="font-extrabold text-amber-900">
+                        {selectedDetail.weather_data.midpoint?.temp_c ?? selectedDetail.weather_data.midpoint?.temp ?? "-"}°C
+                      </div>
+                      <div className="text-[10px] text-amber-700 truncate capitalize">{selectedDetail.weather_data.midpoint?.description || "Cerah"}</div>
                     </div>
                     <div className="p-2 rounded-lg bg-slate-50 border border-slate-200">
                       <div className="text-[10px] text-slate-500 font-bold">AKHIR</div>
-                      <div className="font-extrabold text-slate-800">{selectedDetail.weather_data.destination?.temp}°C</div>
-                      <div className="text-[10px] text-slate-400 truncate">{selectedDetail.weather_data.destination?.description}</div>
+                      <div className="font-extrabold text-slate-800">
+                        {selectedDetail.weather_data.destination?.temp_c ?? selectedDetail.weather_data.destination?.temp ?? "-"}°C
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate capitalize">{selectedDetail.weather_data.destination?.description || "Cerah"}</div>
                     </div>
                   </div>
                 </div>
@@ -644,21 +661,22 @@ export default function HistoryPage() {
               </div>
             </div>
 
-            <div className="flex justify-between items-center pt-3 border-t border-slate-100 text-xs">
-              <span className="text-slate-400">{selectedDetail.created_at}</span>
+            {/* Modal Footer (Fixed at bottom) */}
+            <div className="flex justify-between items-center p-4 sm:p-5 pt-3 border-t border-slate-100 text-xs flex-shrink-0 bg-white">
+              <span className="text-slate-400 truncate max-w-[140px] sm:max-w-none">{selectedDetail.created_at}</span>
               <div className="flex gap-2">
                 <Link
                   href={`/home?q=${encodeURIComponent(selectedDetail.raw_query || "")}&vehicle=${
                     (selectedDetail.vehicle || "").includes("mobil") ? "mobil" : "motor"
                   }&auto=1`}
-                  className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold flex items-center gap-1.5 shadow-sm transition"
+                  className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold flex items-center gap-1.5 shadow-sm transition active:scale-95"
                 >
                   <RotateCw className="w-3.5 h-3.5" />
                   Ulangi Rute
                 </Link>
                 <button
                   onClick={() => setSelectedDetail(null)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold transition"
+                  className="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold transition active:scale-95"
                 >
                   Tutup
                 </button>
